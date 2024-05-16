@@ -1,0 +1,2587 @@
+---
+title: "NEW AGE Negative batch correction and stats whole brain"
+output: html_document
+date: "2023-08-12"
+---
+
+# Install Packages 
+
+```{r}
+library(maplet)
+library(magrittr)
+library(dplyr)
+library(tidyverse)
+library(car)
+library(data.table)
+require(plyr)
+#install.packages('ggpubr')
+library(ggpubr)
+```
+
+# Import Data and normalize brains percentage to pixel sizes
+
+Below we import the data.
+
+```{r}
+percentage_of_ion_intensities_roi_226_a2_wt_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/226_a2_wt_s2_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_226_a2_wt_whole_brain_df)[1] = "226_a2_wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_226_a2_wt_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_226_a2_wt_whole_brain_df)
+
+percentage_of_ion_intensities_roi_225_4wt_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/225_4wt_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_225_4wt_whole_brain_df)[1] = "225_4wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_225_4wt_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_225_4wt_whole_brain_df)
+
+percentage_of_ion_intensities_roi_225_a1wt_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/225_a1wt_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_225_a1wt_whole_brain_df)[1] = "225_a1wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_225_a1wt_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_225_a1wt_whole_brain_df)
+
+percentage_of_ion_intensities_roi_208_5wt_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/208_5wt_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_208_5wt_whole_brain_df)[1] = "208_5wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_208_5wt_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_208_5wt_whole_brain_df)
+
+percentage_of_ion_intensities_roi_209_2wt_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/209_2wt_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_209_2wt_whole_brain_df)[1] = "209_2wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_209_2wt_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_209_2wt_whole_brain_df)
+
+percentage_of_ion_intensities_roi_278_a2_wt_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/278_a2_wt_s1_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_278_a2_wt_whole_brain_df)[1] = "278_a2_wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_278_a2_wt_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_278_a2_wt_whole_brain_df)
+
+percentage_of_ion_intensities_roi_191_a3wt_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/191_a3wt_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_191_a3wt_whole_brain_df)[1] = "191_a3wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_191_a3wt_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_191_a3wt_whole_brain_df)
+
+percentage_of_ion_intensities_roi_252_8_wt_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/252_8_wt_s1_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_252_8_wt_whole_brain_df)[1] = "252_8_wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_252_8_wt_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_252_8_wt_whole_brain_df)
+
+percentage_of_ion_intensities_roi_268_a3_wt_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/268_a3_wt_s2_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_268_a3_wt_whole_brain_df)[1] = "268_a3_wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_268_a3_wt_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_268_a3_wt_whole_brain_df)
+
+percentage_of_ion_intensities_roi_225_a2tg_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/225_a2tg_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_225_a2tg_whole_brain_df)[1] = "225_a2tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_225_a2tg_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_225_a2tg_whole_brain_df)
+
+percentage_of_ion_intensities_roi_270_5_Tg_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/270_5_Tg_s4_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_270_5_Tg_whole_brain_df)[1] = "270_5_Tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_270_5_Tg_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_270_5_Tg_whole_brain_df)
+
+percentage_of_ion_intensities_roi_225_3tg_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/225_3tg_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_225_3tg_whole_brain_df)[1] = "225_3tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_225_3tg_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_225_3tg_whole_brain_df)
+
+percentage_of_ion_intensities_roi_270_a1_Tg_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/270_a1_Tg_s1_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_270_a1_Tg_whole_brain_df)[1] = "270_a1_Tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_270_a1_Tg_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_270_a1_Tg_whole_brain_df)
+
+percentage_of_ion_intensities_roi_226_a1tg_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/226_a1tg_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_226_a1tg_whole_brain_df)[1] = "226_a1tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_226_a1tg_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_226_a1tg_whole_brain_df)
+
+percentage_of_ion_intensities_roi_210_a1tg_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/210_a1tg_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_210_a1tg_whole_brain_df)[1] = "210_a1tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_210_a1tg_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_210_a1tg_whole_brain_df)
+
+percentage_of_ion_intensities_roi_249_4_Tg_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/249_4_Tg_s1_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_249_4_Tg_whole_brain_df)[1] = "249_4_Tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_249_4_Tg_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_249_4_Tg_whole_brain_df)
+
+percentage_of_ion_intensities_roi_256_a3_Tg_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/256_a3_Tg_s1_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_256_a3_Tg_whole_brain_df)[1] = "256_a3_Tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_256_a3_Tg_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_256_a3_Tg_whole_brain_df)
+
+percentage_of_ion_intensities_roi_268_3_Tg_whole_brain_df <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/268_3_Tg_s4_percentage_of_ions_within_whole_brain.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_268_3_Tg_whole_brain_df)[1] = "268_3_Tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_268_3_Tg_whole_brain_df$ions <- rownames(percentage_of_ion_intensities_roi_268_3_Tg_whole_brain_df)
+```
+
+Below we combine all the normalized percentage.
+
+```{r}
+dfs_to_merge <- list(percentage_of_ion_intensities_roi_226_a2_wt_whole_brain_df, percentage_of_ion_intensities_roi_225_4wt_whole_brain_df, percentage_of_ion_intensities_roi_225_a1wt_whole_brain_df, percentage_of_ion_intensities_roi_208_5wt_whole_brain_df, percentage_of_ion_intensities_roi_209_2wt_whole_brain_df, percentage_of_ion_intensities_roi_278_a2_wt_whole_brain_df, percentage_of_ion_intensities_roi_191_a3wt_whole_brain_df, percentage_of_ion_intensities_roi_252_8_wt_whole_brain_df, percentage_of_ion_intensities_roi_268_a3_wt_whole_brain_df, percentage_of_ion_intensities_roi_225_a2tg_whole_brain_df, percentage_of_ion_intensities_roi_270_5_Tg_whole_brain_df, percentage_of_ion_intensities_roi_225_3tg_whole_brain_df, percentage_of_ion_intensities_roi_270_a1_Tg_whole_brain_df, percentage_of_ion_intensities_roi_226_a1tg_whole_brain_df, percentage_of_ion_intensities_roi_210_a1tg_whole_brain_df, percentage_of_ion_intensities_roi_249_4_Tg_whole_brain_df, percentage_of_ion_intensities_roi_256_a3_Tg_whole_brain_df, percentage_of_ion_intensities_roi_268_3_Tg_whole_brain_df)
+# Merge all into one
+final_data_merged <- dfs_to_merge %>% reduce(full_join, by='ions')
+# make ions into rownames again
+rownames(final_data_merged) <- final_data_merged$ions
+# Remove ions column
+final_data_merged$ions <- NULL
+```
+
+
+# Creating Dataframe for Data Without Batch Correction
+
+```{r}
+# Below we create a vector to specify the groups 
+treatment_groups <- c("wt", "wt", "wt", "wt", "wt", "wt", "wt", "wt", 'wt', "tg", "tg", "tg", "tg", "tg", "tg", "tg", "tg", "tg")
+
+# Create a vector to represent decjan and august batches
+batch_groups <- c("decjan", "august", "august", "august", "august", "decjan", "august", "decjan", "decjan", "august", "decjan", "august", "decjan", "august", "august", "decjan", "decjan", "decjan")
+
+# Create dataframe of both columns describing data 
+data_for_coldata <- data.frame(treatment_groups, batch_groups)
+
+# Make into a matrix
+final_data_merged_matrix <- as.matrix(final_data_merged)
+```
+
+Below we run the pipeline without batch correction to see what the PCA looks like.
+
+```{r}
+# Make data into percentagemarized experiment object
+raw_SE <- SummarizedExperiment(assays=list(counts=final_data_merged_matrix), colData = data_for_coldata)
+# Put data through Maplet Pipeline
+processed_SE <- raw_SE %>%
+  mt_pre_trans_scale() %>% # Scale data (z-scores)
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+
+processed_SE <- processed_SE %>% 
+  mt_plots_pca(color = processed_SE$treatment_groups) %>% #Create PCA plot colored by treatment
+  mt_plots_pca(color = processed_SE$batch_groups) #Create PCA plot colored by batch
+```
+
+Plot the PCA below colored by treatment and batch.
+
+```{r}
+processed_SE@metadata$results$`plots_pca.4c2da2c3-fb52-4d06-8674-267c82d3f3c0`
+
+processed_SE@metadata$results$`plots_pca.449e5af7-c50e-4a8b-8bc5-60d88e4f718f`
+```
+
+# Combat Batch Correction
+
+1. create a SE for batch1 D1 ----
+2. preprocess and impute D1 ----
+3. create a SE D2 for batch2 -----
+4. preprocess and impute D2 ----
+5. merge preprocessed D1 and D2 and create a SE D ----
+6. apply combat batch correction ----
+
+```{r}
+# Split into decjan and august batch data
+august_data <- final_data_merged_matrix[, which(batch_groups == "august")]
+decjan_data <- final_data_merged_matrix[, which(batch_groups == "decjan")]
+
+# Create vector that represent "august" for august data and "decjan" for decjan data
+batch_groups_august <- c(rep("august", ncol(august_data)))
+batch_groups_decjan <- c(rep("decjan", ncol(decjan_data)))
+
+# Create vector that represent treatments for august data
+treatment_august <- treatment_groups[which(batch_groups == "august")]
+# Create vector that represent CRE and CSE for decjan data
+treatment_decjan <- treatment_groups[which(batch_groups == "decjan")]
+
+# Create dataframe of both columns describing august data 
+data_for_coldata_august <- data.frame(batch_groups_august, treatment_august)
+# Create dataframe of both columns describing decjan data 
+data_for_coldata_decjan <- data.frame(batch_groups_decjan, treatment_decjan)
+
+# Make data into summarized experiment object
+raw_SE_batch1 <- SummarizedExperiment(assays=list(counts=august_data), colData = data_for_coldata_august)
+# Put data through Maplet Pipeline
+processed_SE_batch1 <- raw_SE_batch1 %>%
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+
+# Make data into summarized experiment object
+raw_SE_batch2 <- SummarizedExperiment(assays=list(counts=decjan_data), colData = data_for_coldata_decjan)
+processed_SE_batch2 <- raw_SE_batch2 %>%
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+# Create dataframes of expression batch 1
+batch1_data <- processed_SE_batch1@assays@data$counts
+# Create dataframes of expression batch 2
+batch2_data <- processed_SE_batch2@assays@data$counts
+ 
+# Keep only m/z values in common between batches
+final_data_for_maplet <- merge(batch1_data, batch2_data, by = 'row.names')
+
+# Make m/z values rownames
+rownames(final_data_for_maplet) <- final_data_for_maplet$Row.names
+# Remove m/z column
+final_data_for_maplet$Row.names <- NULL
+
+# Create vector that represent "august" for august data and "decjan" for decjan data
+batch_groups_final <- c(processed_SE_batch1$batch_groups_august, processed_SE_batch2$batch_groups_decjan)
+
+# Create vector that represent treatment for final data
+treatment_final <- c(treatment_august, treatment_decjan)
+
+# Create dataframe of both columns describing final data 
+data_for_coldata_final <- data.frame(batch_groups_final, treatment_final)
+
+# Change column names to make them shorter
+#colnames(final_data_for_maplet) <- c("210_a1tg_wtY", "270_5_Tg_wtY", "252_8_wt_wtY", "225_3tg_wtB", "226_a2_wt_wtB", "249_4_Tg_TgY", "226_a1_Tg_TgY", "268_a3_wt_TgY", "191_a3wt_TgB", "270_a1_Tg_TgB", "271_a3_Tg_wtY", "208_5wt_wtY", "225_a1wt_wtB", "225_4wt_wtB", "256_a3_Tg_TgY", "209_2wt_TgY", "268_3_Tg_TgB", "278_a2_wt_TgB")
+
+# Create single summarized experiment object
+SE_batches_final <- SummarizedExperiment(assays=list(counts= as.matrix(final_data_for_maplet)), colData = data_for_coldata_final, rowData = data.frame(name=rownames(final_data_for_maplet)))
+
+SE_batches_final_combat <- SE_batches_final %>% 
+  mt_clean_validate_se() %>%
+  mt_load_flag_logged() %>%
+  mt_pre_batch_combat(batch_col = "batch_groups_final") %>%
+  mt_pre_trans_scale()
+
+
+SE_batches_final_combat <- SE_batches_final_combat %>% 
+  mt_plots_pca(color = SE_batches_final_combat$batch_groups_final) %>% # Create PCA plot after batch correction colored by batch
+  mt_plots_pca(color = SE_batches_final_combat$treatment_final) %>% #Create PCA plot after batch correction colored by resistance type
+mt_plots_pca(color = SE_batches_final_combat$treatment_final, shape=batch_groups_final) # Create pca plot after batch correction colored by resistance type and shaped by batch
+
+# Make vector for batches
+batch_data <- SE_batches_final_combat$batch_groups_final
+
+final_assay <- assay(SE_batches_final_combat)
+
+```
+
+Below we create an object for the transposed data matrix after batch correction.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite <- t(final_assay)
+```
+
+Below we visualize all the PCA plots.
+
+```{r}
+SE_batches_final_combat@metadata$results$`plots_pca.ba516100-9cc2-4e49-b190-dd598e5ce8de`
+
+SE_batches_final_combat@metadata$results$`plots_pca.d35945cd-e0a7-4281-b3e3-e3fec5a61946`
+
+SE_batches_final_combat@metadata$results$`plots_pca.f54f8d1d-ffb8-429f-a10a-1658f117a663`
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different between batches after batch correction. 
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite[,i], batch_data)
+    aov_test <- aov(metabolite ~ batch_groups_final, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_batch <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite), unlist(final_statistics))
+
+significant_aov_dataframe_batch <- final_aov_dataframe_batch[final_aov_dataframe_batch$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_batch <- final_aov_dataframe_batch %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_batch$unlist.final_statistics., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_batch <- final_aov_dataframe_with_correction_batch[final_aov_dataframe_with_correction_batch$group_padj < 0.05, ]
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different. There are no significantly different metabolites between wt and Tg samples.
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+treatment_final_wt_vs_tg <- ifelse(treatment_final %like% "w", "wt", "tg")
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite[,i], treatment_final_wt_vs_tg)
+    aov_test <- aov(metabolite ~ treatment_final_wt_vs_tg, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+# Create dataframe of metabolites and their anova pvalues
+final_aov_dataframe <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite), unlist(final_statistics))
+
+# Create dataframe of unadjusted significant pvalues 
+significant_aov_dataframe <- final_aov_dataframe[final_aov_dataframe$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction <- final_aov_dataframe %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe$unlist.final_statistics., method = 'fdr'))
+
+# Create dataframe of adjusted significant pvalues 
+significant_aov_dataframe_with_correction <- final_aov_dataframe_with_correction[final_aov_dataframe_with_correction$group_padj < 0.05, ]
+```
+
+
+# Repeat with Median Batch Correction
+
+Below we run median batch correction - dividing each batch by its median for each ion and then combining the results.
+
+```{r}
+august_data <- final_data_merged_matrix[, which(batch_groups == "august")]
+median_august <- apply(august_data, 1, median, na.rm=TRUE)
+august_data_final <- august_data/median_august
+#Remove rows with NA's using na.omit()
+august_data_final <- na.omit(august_data_final)
+
+decjan_data <- final_data_merged_matrix[, which(batch_groups == "decjan")]
+median_decjan <- apply(decjan_data, 1, median, na.rm=TRUE)
+decjan_data_final <- decjan_data/median_decjan
+#Remove rows with NA's using na.omit()
+decjan_data_final <- na.omit(decjan_data_final)
+
+# Keep only m/z values in common between batches
+final_data_for_maplet <- merge(august_data_final, decjan_data_final, by = 'row.names')
+
+# Make m/z values rownames
+rownames(final_data_for_maplet) <- final_data_for_maplet$Row.names
+# Remove m/z column
+final_data_for_maplet$Row.names <- NULL
+
+# Create single summarized experiment object
+SE_batches_final <- SummarizedExperiment(assays=list(counts= as.matrix(final_data_for_maplet)), colData = data_for_coldata_final, rowData = data.frame(name=rownames(final_data_for_maplet)))
+
+SE_batches_final_median <- SE_batches_final %>% 
+  mt_pre_trans_scale()
+
+SE_batches_final_median <- SE_batches_final_median %>% 
+  mt_plots_pca(color = SE_batches_final_median$batch_groups_final) %>% # Create PCA plot after batch correction colored by batch
+  mt_plots_pca(color = SE_batches_final_median$treatment_final) %>% #Create PCA plot after batch correction colored by resistance type
+mt_plots_pca(color = SE_batches_final_median$treatment_final, shape=batch_groups_final) # Create pca plot after batch correction colored by resistance type and shaped by batch
+
+# Make vector for batches
+batch_data <- SE_batches_final_median$batch_groups_final
+
+final_assay <- assay(SE_batches_final_median)
+```
+
+Below we visualize all the PCA plots.
+
+```{r}
+SE_batches_final_median@metadata$results$`plots_pca.44004394-5f0d-4579-8eec-afe41413c963`
+
+SE_batches_final_median@metadata$results$`plots_pca.68682a0d-2b9e-4ead-b659-f6b0c662d651`
+
+SE_batches_final_median@metadata$results$`plots_pca.0b81898f-9e6f-451c-a05c-ad77ee0e92a2`
+```
+
+
+# Everything with filtered ions
+
+Below we import our filtered ions.
+
+```{r}
+filtered_ion_list <- read.csv('D:/NEW All AGE Negative masks and roi sums/Whole Brains/two_sd_filtered_ions_no_noise.csv', row.names = 1)
+
+final_data_merged_matrix_filtered <- final_data_merged_matrix[rownames(final_data_merged_matrix) %in% filtered_ion_list$X0, ]
+```
+
+Below we run the pipeline without batch correction to see what the PCA looks like.
+
+```{r}
+# Make data into summarized experiment object
+raw_SE <- SummarizedExperiment(assays=list(counts=final_data_merged_matrix_filtered), colData = data_for_coldata)
+# Put data through Maplet Pipeline
+processed_SE <- raw_SE %>%
+  mt_pre_trans_scale() %>% # Scale data (z-scores)
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+
+processed_SE <- processed_SE %>% 
+  mt_plots_pca(color = processed_SE$treatment_groups) %>% #Create PCA plot colored by treatment
+  mt_plots_pca(color = processed_SE$batch_groups) #Create PCA plot colored by batch
+```
+
+Plot the PCA below colored by treatment and batch.
+
+```{r}
+processed_SE@metadata$results$`plots_pca.70bfab82-89b0-4d47-957c-dfbf7baf4b48`
+
+processed_SE@metadata$results$`plots_pca.2d93ac07-aab7-4abc-8832-71432fc8360c`
+```
+
+Below we run combat batch correction.
+
+```{r}
+august_data <- final_data_merged_matrix[, which(batch_groups == "august")]
+august_data_filtered <- august_data[rownames(august_data) %in% filtered_ion_list$X0, ]
+decjan_data <- final_data_merged_matrix[, which(batch_groups == "decjan")]
+decjan_data_filtered <- decjan_data[rownames(decjan_data) %in% filtered_ion_list$X0, ]
+
+# Make data into summarized experiment object
+raw_SE_batch1 <- SummarizedExperiment(assays=list(counts=august_data_filtered), colData = data_for_coldata_august)
+# Put data through Maplet Pipeline
+processed_SE_batch1 <- raw_SE_batch1 %>%
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+
+# Make data into summarized experiment object
+raw_SE_batch2 <- SummarizedExperiment(assays=list(counts=decjan_data_filtered), colData = data_for_coldata_decjan)
+processed_SE_batch2 <- raw_SE_batch2 %>%
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+# Create dataframes of expression batch 1
+batch1_data <- processed_SE_batch1@assays@data$counts
+# Create dataframes of expression batch 2
+batch2_data <- processed_SE_batch2@assays@data$counts
+ 
+# Keep only m/z values in common between batches
+final_data_for_maplet <- merge(batch1_data, batch2_data, by = 'row.names')
+
+# Make m/z values rownames
+rownames(final_data_for_maplet) <- final_data_for_maplet$Row.names
+# Remove m/z column
+final_data_for_maplet$Row.names <- NULL
+
+# Create vector that represent "august" for august data and "decjan" for decjan data
+batch_groups_final <- c(processed_SE_batch1$batch_groups_august, processed_SE_batch2$batch_groups_decjan)
+
+# Create vector that represent treatment for final data
+treatment_final <- c(treatment_august, treatment_decjan)
+
+# Create dataframe of both columns describing final data 
+data_for_coldata_final <- data.frame(batch_groups_final, treatment_final)
+
+# Change column names to make them shorter
+#colnames(final_data_for_maplet) <- c("210_a1tg_wtY", "270_5_Tg_wtY", "252_8_wt_wtY", "225_3tg_wtB", "226_a2_wt_wtB", "249_4_Tg_TgY", "226_a1_Tg_TgY", "268_a3_wt_TgY", "191_a3wt_TgB", "270_a1_Tg_TgB", "271_a3_Tg_wtY", "208_5wt_wtY", "225_a1wt_wtB", "225_4wt_wtB", "256_a3_Tg_TgY", "209_2wt_TgY", "268_3_Tg_TgB", "278_a2_wt_TgB")
+
+# Create single summarized experiment object
+SE_batches_final <- SummarizedExperiment(assays=list(counts= as.matrix(final_data_for_maplet)), colData = data_for_coldata_final, rowData = data.frame(name=rownames(final_data_for_maplet)))
+
+SE_batches_not_standardized_combat <- SE_batches_final %>% 
+  mt_clean_validate_se() %>%
+  mt_load_flag_logged() %>%
+  mt_pre_batch_combat(batch_col = "batch_groups_final") 
+assay_not_standardized <- assay(SE_batches_not_standardized_combat)
+write.csv(assay_not_standardized, "D:/NEW All AGE Negative masks and roi sums/Whole Brains/AGE_negative_whole_brain_combat_batch_corrected_percentages.csv")
+
+SE_batches_final_combat <- SE_batches_final %>% 
+  mt_clean_validate_se() %>%
+  mt_load_flag_logged() %>%
+  mt_pre_batch_combat(batch_col = "batch_groups_final") %>%
+  mt_pre_trans_scale()
+
+
+SE_batches_final_combat <- SE_batches_final_combat %>% 
+  mt_plots_pca(color = SE_batches_final_combat$batch_groups_final) %>% # Create PCA plot after batch correction colored by batch
+  mt_plots_pca(color = SE_batches_final_combat$treatment_final) %>% #Create PCA plot after batch correction colored by resistance type
+mt_plots_pca(color = SE_batches_final_combat$treatment_final, shape=batch_groups_final) # Create pca plot after batch correction colored by resistance type and shaped by batch
+
+# Make vector for batches
+batch_data <- SE_batches_final_combat$batch_groups_final
+
+final_assay <- assay(SE_batches_final_combat)
+```
+
+Below we create an object for the transposed data matrix after batch correction.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite <- t(final_assay)
+```
+
+Below we visualize all the PCA plots.
+
+```{r}
+SE_batches_final_combat@metadata$results$`plots_pca.88885741-0edd-4da1-b43a-600b659c89d1`
+
+SE_batches_final_combat@metadata$results$`plots_pca.5a484cdf-6794-4f17-a548-a9206a31c08c`
+
+SE_batches_final_combat@metadata$results$`plots_pca.2e8f2e53-fc01-4db4-9090-16bf04fc4319`
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different between batches after batch correction. 
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite[,i], batch_data)
+    aov_test <- aov(metabolite ~ batch_groups_final, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_batch <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite), unlist(final_statistics))
+
+significant_aov_dataframe_batch <- final_aov_dataframe_batch[final_aov_dataframe_batch$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_batch <- final_aov_dataframe_batch %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_batch$unlist.final_statistics., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_batch <- final_aov_dataframe_with_correction_batch[final_aov_dataframe_with_correction_batch$group_padj < 0.05, ]
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different. There are no significantly different metabolites between wt and Tg samples.
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+treatment_final_wt_vs_tg <- ifelse(treatment_final %like% "w", "wt", "tg")
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite[,i], treatment_final_wt_vs_tg)
+    aov_test <- aov(metabolite ~ treatment_final_wt_vs_tg, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+# Create dataframe of metabolites and their anova pvalues
+final_aov_dataframe <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite), unlist(final_statistics))
+
+# Create dataframe of unadjusted significant pvalues 
+significant_aov_dataframe <- final_aov_dataframe[final_aov_dataframe$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction <- final_aov_dataframe %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe$unlist.final_statistics., method = 'fdr'))
+
+# Create dataframe of adjusted significant pvalues 
+significant_aov_dataframe_with_correction <- final_aov_dataframe_with_correction[final_aov_dataframe_with_correction$group_padj < 0.05, ]
+```
+
+# Repeat with Median Batch Correction
+
+Below we run median batch correction - dividing each batch by its median for each ion and then combining the results.
+
+```{r}
+august_data <- final_data_merged_matrix_filtered[, which(batch_groups == "august")]
+median_august <- apply(august_data, 1, median, na.rm=TRUE)
+august_data_final <- august_data/median_august
+
+decjan_data <- final_data_merged_matrix_filtered[, which(batch_groups == "decjan")]
+median_decjan <- apply(decjan_data, 1, median, na.rm=TRUE)
+decjan_data_final <- decjan_data/median_decjan
+ 
+# Keep only m/z values in common between batches
+final_data_for_maplet <- merge(august_data_final, decjan_data_final, by = 'row.names')
+
+# Make m/z values rownames
+rownames(final_data_for_maplet) <- final_data_for_maplet$Row.names
+# Remove m/z column
+final_data_for_maplet$Row.names <- NULL
+
+# Create single summarized experiment object
+SE_batches_final <- SummarizedExperiment(assays=list(counts= as.matrix(final_data_for_maplet)), colData = data_for_coldata_final, rowData = data.frame(name=rownames(final_data_for_maplet)))
+
+# Save median batch correction matrix
+median_batch_corrected_data_ions_of_interest <- assay(SE_batches_final)
+#write.csv(median_batch_corrected_data_ions_of_interest, file = "D:/NEW All AGE Negative masks and roi sums/Whole Brains/AGE_median_batch_corrected_sums_ions_of_interest.csv")
+
+SE_batches_final_median <- SE_batches_final %>% 
+  mt_pre_trans_scale()
+
+SE_batches_final_median <- SE_batches_final_median %>% 
+  mt_plots_pca(color = SE_batches_final_median$batch_groups_final) %>% # Create PCA plot after batch correction colored by batch
+  mt_plots_pca(color = SE_batches_final_median$treatment_final) %>% #Create PCA plot after batch correction colored by resistance type
+mt_plots_pca(color = SE_batches_final_median$treatment_final, shape=batch_groups_final) # Create pca plot after batch correction colored by resistance type and shaped by batch
+
+# Make vector for batches
+batch_data <- SE_batches_final_median$batch_groups_final
+
+final_assay <- assay(SE_batches_final_median)
+```
+
+Below we visualize all the PCA plots.
+
+```{r}
+SE_batches_final_median@metadata$results$`plots_pca.6863c036-d2cb-4f86-a238-cdcb30e62d2b`
+
+SE_batches_final_median@metadata$results$`plots_pca.3f195372-3c34-416d-833d-8a6a7ca8dc64`
+
+SE_batches_final_median@metadata$results$`plots_pca.d803730a-0589-461c-ab93-648f728ba0b1`
+```
+
+Below we create an object for the transposed data matrix after batch correction.
+
+```{r}
+processed_metabolite_values_median_final_sample_by_metabolite <- t(final_assay)
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different between batches after batch correction. 
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_median_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_median_final_sample_by_metabolite[,i], batch_data)
+    aov_test <- aov(metabolite ~ batch_groups_final, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_batch <- data.frame(colnames(processed_metabolite_values_median_final_sample_by_metabolite), unlist(final_statistics))
+
+significant_aov_dataframe_batch <- final_aov_dataframe_batch[final_aov_dataframe_batch$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_batch <- final_aov_dataframe_batch %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_batch$unlist.final_statistics., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_batch <- final_aov_dataframe_with_correction_batch[final_aov_dataframe_with_correction_batch$group_padj < 0.05, ]
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different. There are no significantly different metabolites between wt and Tg samples.
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+treatment_final_wt_vs_tg <- ifelse(treatment_final %like% "w", "wt", "tg")
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_median_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_median_final_sample_by_metabolite[,i], treatment_final_wt_vs_tg)
+    aov_test <- aov(metabolite ~ treatment_final_wt_vs_tg, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+# Create dataframe of metabolites and their anova pvalues
+final_aov_dataframe <- data.frame(colnames(processed_metabolite_values_median_final_sample_by_metabolite), unlist(final_statistics))
+
+# Create dataframe of unadjusted significant pvalues 
+significant_aov_dataframe <- final_aov_dataframe[final_aov_dataframe$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction <- final_aov_dataframe %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe$unlist.final_statistics., method = 'fdr'))
+
+# Create dataframe of adjusted significant pvalues 
+significant_aov_dataframe_with_correction <- final_aov_dataframe_with_correction[final_aov_dataframe_with_correction$group_padj < 0.05, ]
+```
+
+# Statistical testing between specific phenotypes
+
+
+Below we run ANOVA to see if there are differences between all groups.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_anova_all <- processed_metabolite_values_combat_final_sample_by_metabolite
+# Create identification list for just tg light samples
+treatment_final_all <- c("wt_6mo", "wt_6mo", "wt_12mo", "wt_12mo", "wt_22mo", "tg_6mo", "tg_6mo", "tg_6mo", "tg_12mo", "wt_6mo", "wt_12mo", "wt_22mo", "wt_22mo", "tg_12mo", "tg_12mo", "tg_22mo", "tg_22mo", "tg_22mo")
+
+# Make list for pvalues to be added to
+aov_pval_list_all <- list()
+
+final_statistics_anova_all <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_anova_all), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_anova_all[,i], treatment_final_all)
+    aov_test <- aov(metabolite ~ treatment_final_all, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_all[[length(aov_pval_list_all) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_all <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_anova_all), unlist(final_statistics_anova_all))
+
+significant_aov_dataframe_anova_all <- final_aov_dataframe_anova_all[final_aov_dataframe_anova_all$unlist.final_statistics_anova_all. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_all <- final_aov_dataframe_anova_all %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_all$unlist.final_statistics_anova_all., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_all <- final_aov_dataframe_with_correction_anova_all[final_aov_dataframe_with_correction_anova_all$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo, 12mo, and 22mo for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/6mo_vs_12mo_vs_22mo_significant_all_ANOVA_ion_",ion,".png"))
+boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_anova_all[, ion] ~ factor(treatment_final_all, levels = c('wt_6mo', 'wt_12mo', 'wt_22mo', 'tg_6mo', 'tg_12mo', 'tg_22mo')), las = 2, main=paste("Ion distribution all groups", ion), xlab = "", ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we perform statistical testing for the 6mo mice with only the significant ions from the ANOVA with all groups.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_a1wt|225_4wt|226_a2_wt|225_3tg|225_a2tg|226_a1tg",]
+# Create subset of identification list for just 6mo light samples
+treatment_final_6mo <- c("wt", "wt", "tg", "tg", "tg", "wt")
+# Create subset for just 6mo light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_6mo[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+# Create subset of identification list for just 6mo light samples
+ttest_pval_list_6mo_after_anova <- list()
+final_statistics_6mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova), function(i){
+    ttest_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova[,i], treatment_final_6mo)
+    t_test <- t.test(metabolite ~ treatment_final_6mo, data = ttest_df, var.equal = TRUE)
+    ttest_pval <- t_test$p.value
+    ttest_pval_list_6mo_after_anova[[length(ttest_pval_list_6mo_after_anova) + 1]] <- ttest_pval
+})
+final_ttest_dataframe_6mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova), unlist(final_statistics_6mo_after_anova))
+significant_ttest_dataframe_6mo_after_anova <- final_ttest_dataframe_6mo_after_anova[final_ttest_dataframe_6mo_after_anova$unlist.final_statistics_6mo_after_anova. < 0.05, ]
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_ttest_dataframe_with_correction_6mo_after_anova <- final_ttest_dataframe_6mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_ttest_dataframe_6mo_after_anova$unlist.final_statistics_6mo_after_anova., method = 'fdr'))
+significant_ttest_dataframe_with_correction_6mo_after_anova <- final_ttest_dataframe_with_correction_6mo_after_anova[final_ttest_dataframe_with_correction_6mo_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for wt and Tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_ttest_dataframe_6mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/wt_vs_tg_significant_6mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo[, ion] ~ treatment_final_6mo, main="Ion distribution WT vs Tg 6mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+# Repeat for significant with correction
+for (ion in significant_ttest_dataframe_with_correction_6mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/wt_vs_tg_significant_with_correction_6mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo[, ion] ~ treatment_final_6mo, main="Ion distribution WT vs Tg 6mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we perform statistical testing for the 12mo mice with only the significant ions from the ANOVA with all groups.
+
+```{r}
+# Create subset for just 12mo light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "208_5wt|209_2wt|278_a2_wt|210_a1tg|270_a1_Tg|270_5_Tg",]
+# Create subset of identification list for just 12mo light samples
+treatment_final_12mo <- c("wt", "wt", "tg", "wt", "tg", "tg")
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_12mo[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+# Create subset of identification list for just 12mo light samples
+ttest_pval_list_12mo_after_anova <- list()
+final_statistics_12mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova), function(i){
+    ttest_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova[,i], treatment_final_12mo)
+    t_test <- t.test(metabolite ~ treatment_final_12mo, data = ttest_df, var.equal = TRUE)
+    ttest_pval <- t_test$p.value
+    ttest_pval_list_12mo_after_anova[[length(ttest_pval_list_12mo_after_anova) + 1]] <- ttest_pval
+})
+final_ttest_dataframe_12mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova), unlist(final_statistics_12mo_after_anova))
+significant_ttest_dataframe_12mo_after_anova <- final_ttest_dataframe_12mo_after_anova[final_ttest_dataframe_12mo_after_anova$unlist.final_statistics_12mo_after_anova. < 0.05, ]
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_ttest_dataframe_with_correction_12mo_after_anova <- final_ttest_dataframe_12mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_ttest_dataframe_12mo_after_anova$unlist.final_statistics_12mo_after_anova., method = 'fdr'))
+significant_ttest_dataframe_with_correction_12mo_after_anova <- final_ttest_dataframe_with_correction_12mo_after_anova[final_ttest_dataframe_with_correction_12mo_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for wt and Tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_ttest_dataframe_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/wt_vs_tg_significant_12mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo[, ion] ~ treatment_final_12mo, main="Ion distribution WT vs Tg 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+# Repeat for significant with correction
+for (ion in significant_ttest_dataframe_with_correction_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/wt_vs_tg_significant_with_correction_12mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo[, ion] ~ treatment_final_12mo, main="Ion distribution WT vs Tg 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we perform statistical testing for the 22mo mice with only the significant ions from the ANOVA with all groups.
+
+```{r}
+# Create subset for just 22mo samples
+processed_metabolite_values_combat_final_sample_by_metabolite_22mo <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "191_a3wt|252_8_wt|268_a3_wt|249_4_Tg|256_a3_Tg|268_3_Tg",]
+# Create subset of identification list for just 22mo light samples
+treatment_final_22mo <- c("wt", "wt", "wt", "tg", "tg", "tg")
+processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_22mo[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+# Create subset of identification list for just 22mo light samples
+ttest_pval_list_22mo_after_anova <- list()
+final_statistics_22mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova), function(i){
+    ttest_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova[,i], treatment_final_22mo)
+    t_test <- t.test(metabolite ~ treatment_final_22mo, data = ttest_df, var.equal = TRUE)
+    ttest_pval <- t_test$p.value
+    ttest_pval_list_22mo_after_anova[[length(ttest_pval_list_22mo_after_anova) + 1]] <- ttest_pval
+})
+final_ttest_dataframe_22mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova), unlist(final_statistics_22mo_after_anova))
+significant_ttest_dataframe_22mo_after_anova <- final_ttest_dataframe_22mo_after_anova[final_ttest_dataframe_22mo_after_anova$unlist.final_statistics_22mo_after_anova. < 0.05, ]
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_ttest_dataframe_with_correction_22mo_after_anova <- final_ttest_dataframe_22mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_ttest_dataframe_22mo_after_anova$unlist.final_statistics_22mo_after_anova., method = 'fdr'))
+significant_ttest_dataframe_with_correction_22mo_after_anova <- final_ttest_dataframe_with_correction_22mo_after_anova[final_ttest_dataframe_with_correction_22mo_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for wt and Tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_ttest_dataframe_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/wt_vs_tg_significant_22mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_22mo[, ion] ~ treatment_final_22mo, main="Ion distribution WT vs Tg 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+# Repeat for significant with correction
+for (ion in significant_ttest_dataframe_with_correction_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/wt_vs_tg_significant_with_correction_22mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_22mo[, ion] ~ treatment_final_22mo, main="Ion distribution WT vs Tg 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we run ANOVA to see if there are differences between wt over time.
+
+```{r}
+# Create subset for just wt light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_a1wt|225_4wt|226_a2_wt|208_5wt|209_2wt|278_a2_wt|191_a3wt|252_8_wt|268_a3_wt",]
+# Create subset of identification list for just wt light samples
+treatment_final_wt <- c("6mo", "6mo", "12mo", "12mo", "22mo", "6mo", "12mo", "22mo", "22mo")
+# Create subset for just 12mo light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_wt_after_anova <- list()
+
+final_statistics_anova_wt_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova[,i], treatment_final_wt)
+    aov_test <- aov(metabolite ~ treatment_final_wt, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_wt_after_anova[[length(aov_pval_list_wt_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_wt_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova), unlist(final_statistics_anova_wt_after_anova))
+
+significant_aov_dataframe_anova_wt_after_anova <- final_aov_dataframe_anova_wt_after_anova[final_aov_dataframe_anova_wt_after_anova$unlist.final_statistics_anova_wt_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_wt_after_anova <- final_aov_dataframe_anova_wt_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_wt_after_anova$unlist.final_statistics_anova_wt_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_wt_after_anova <- final_aov_dataframe_with_correction_anova_wt_after_anova[final_aov_dataframe_with_correction_anova_wt_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo, 12mo, and 22mo for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_wt_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/6mo_vs_12mo_vs_22mo_significant_wt_ANOVA_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt[, ion] ~ factor(treatment_final_wt, levels = c('6mo', '12mo', '22mo')), main="Ion distribution WT 6mo vs 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+# Repeat for significant with correction
+for (ion in significant_aov_dataframe_with_correction_anova_wt_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/6mo_vs_12mo_vs_22mo_significant_with_correction_wt_ANOVA_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova[, ion] ~ factor(treatment_final_wt, levels = c('6mo', '12mo', '22mo')), main="Ion distribution WT 6mo vs 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we run ANOVA to see if there are differences between tg over time.
+
+```{r}
+# Create subset for just tg light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_3tg|225_a2tg|226_a1tg|210_a1tg|270_a1_Tg|270_5_Tg|249_4_Tg|256_a3_Tg|268_3_Tg",]
+# Create subset of identification list for just tg light samples
+treatment_final_tg <- c("6mo", "6mo", "6mo", "12mo", "12mo", "12mo", "22mo", "22mo", "22mo")
+# Create subset for just 12mo light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_tg_after_anova <- list()
+
+final_statistics_anova_tg_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova[,i], treatment_final_tg)
+    aov_test <- aov(metabolite ~ treatment_final_tg, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_tg_after_anova[[length(aov_pval_list_tg_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_tg_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova), unlist(final_statistics_anova_tg_after_anova))
+
+significant_aov_dataframe_anova_tg_after_anova <- final_aov_dataframe_anova_tg_after_anova[final_aov_dataframe_anova_tg_after_anova$unlist.final_statistics_anova_tg_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_tg_after_anova <- final_aov_dataframe_anova_tg_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_tg_after_anova$unlist.final_statistics_anova_tg_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_tg_after_anova <- final_aov_dataframe_with_correction_anova_tg_after_anova[final_aov_dataframe_with_correction_anova_tg_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo, 12mo, and 22mo for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_tg_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/6mo_vs_12mo_vs_22mo_significant_tg_ANOVA_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg[, ion] ~ factor(treatment_final_tg, levels = c('6mo', '12mo', '22mo')), main="Ion distribution tg 6mo vs 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+# Repeat for significant with correction
+for (ion in significant_aov_dataframe_with_correction_anova_tg_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots/6mo_vs_12mo_vs_22mo_significant_with_correction_tg_ANOVA_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova[, ion] ~ factor(treatment_final_tg, levels = c('6mo', '12mo', '22mo')), main="Ion distribution tg 6mo vs 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we save the statistical results.
+
+```{r}
+colnames(final_aov_dataframe_with_correction_anova_all)[colnames(final_aov_dataframe_with_correction_anova_all) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_all)[colnames(final_aov_dataframe_with_correction_anova_all) == "unlist.final_statistics_anova_all."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_all)[colnames(final_aov_dataframe_with_correction_anova_all) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_all, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Normalized By Pixel/AGE_whole_brain_all_samples_ANOVA_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_ttest_dataframe_with_correction_6mo_after_anova)[colnames(final_ttest_dataframe_with_correction_6mo_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova."] = "ion"
+colnames(final_ttest_dataframe_with_correction_6mo_after_anova)[colnames(final_ttest_dataframe_with_correction_6mo_after_anova) == "unlist.final_statistics_6mo_after_anova."] = "pval"
+colnames(final_ttest_dataframe_with_correction_6mo_after_anova)[colnames(final_ttest_dataframe_with_correction_6mo_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_ttest_dataframe_with_correction_6mo_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Normalized By Pixel/AGE_6mo_whole_brain_wt_vs_tg_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_ttest_dataframe_with_correction_12mo_after_anova)[colnames(final_ttest_dataframe_with_correction_12mo_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova."] = "ion"
+colnames(final_ttest_dataframe_with_correction_12mo_after_anova)[colnames(final_ttest_dataframe_with_correction_12mo_after_anova) == "unlist.final_statistics_12mo_after_anova."] = "pval"
+colnames(final_ttest_dataframe_with_correction_12mo_after_anova)[colnames(final_ttest_dataframe_with_correction_12mo_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_ttest_dataframe_with_correction_12mo_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Normalized By Pixel/AGE_12mo_whole_brain_wt_vs_tg_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_ttest_dataframe_with_correction_22mo_after_anova)[colnames(final_ttest_dataframe_with_correction_22mo_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova."] = "ion"
+colnames(final_ttest_dataframe_with_correction_22mo_after_anova)[colnames(final_ttest_dataframe_with_correction_22mo_after_anova) == "unlist.final_statistics_22mo_after_anova."] = "pval"
+colnames(final_ttest_dataframe_with_correction_22mo_after_anova)[colnames(final_ttest_dataframe_with_correction_22mo_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_ttest_dataframe_with_correction_22mo_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Normalized By Pixel/AGE_22mo_whole_brain_wt_vs_tg_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_wt_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_wt_after_anova) == "unlist.final_statistics_anova_wt_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_wt_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_wt_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Normalized By Pixel/AGE_whole_brain_wt_ANOVA_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_tg_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_tg_after_anova) == "unlist.final_statistics_anova_tg_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_tg_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_tg_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Normalized By Pixel/AGE_whole_brain_tg_ANOVA_filtered_ions_statistical_results.csv', row.names=FALSE)
+```
+
+
+# Testing specific wild type and Tg
+
+Below we statistically test the 6mo and 12mo WT.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_a1wt|225_4wt|226_a2_wt|208_5wt|209_2wt|278_a2_wt",]
+treatment_final_wt_6mo_12mo <- c("6mo", "6mo", "12mo", "12mo", "6mo", "12mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_wt_6mo_12mo_after_anova <- list()
+
+final_statistics_anova_wt_6mo_12mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt[,i], treatment_final_wt_6mo_12mo)
+    aov_test <- aov(metabolite ~ treatment_final_wt_6mo_12mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_wt_6mo_12mo_after_anova[[length(aov_pval_list_wt_6mo_12mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_wt_6mo_12mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt), unlist(final_statistics_anova_wt_6mo_12mo_after_anova))
+
+significant_aov_dataframe_anova_wt_6mo_12mo_after_anova <- final_aov_dataframe_anova_wt_6mo_12mo_after_anova[final_aov_dataframe_anova_wt_6mo_12mo_after_anova$unlist.final_statistics_anova_wt_6mo_12mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova <- final_aov_dataframe_anova_wt_6mo_12mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_wt_6mo_12mo_after_anova$unlist.final_statistics_anova_wt_6mo_12mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_wt_6mo_12mo_after_anova <- final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova[final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo and 12mo wt for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_wt_6mo_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/6mo_vs_12mo_wt_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt[, ion] ~ factor(treatment_final_wt_6mo_12mo, levels = c('6mo', '12mo')), main="Ion distribution wt 6mo vs 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_wt_6mo_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/6mo_vs_12mo_wt_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt[, ion] ~ factor(treatment_final_wt_6mo_12mo, levels = c('6mo', '12mo')), main="Ion distribution wt 6mo vs 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we statistically test the 6mo and 22mo WT.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_a1wt|225_4wt|226_a2_wt|191_a3wt|252_8_wt|268_a3_wt",]
+treatment_final_wt_6mo_22mo <- c("6mo", "6mo", "22mo", "6mo", "22mo", "22mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_wt_6mo_22mo_after_anova <- list()
+
+final_statistics_anova_wt_6mo_22mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt[,i], treatment_final_wt_6mo_22mo)
+    aov_test <- aov(metabolite ~ treatment_final_wt_6mo_22mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_wt_6mo_22mo_after_anova[[length(aov_pval_list_wt_6mo_22mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_wt_6mo_22mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt), unlist(final_statistics_anova_wt_6mo_22mo_after_anova))
+
+significant_aov_dataframe_anova_wt_6mo_22mo_after_anova <- final_aov_dataframe_anova_wt_6mo_22mo_after_anova[final_aov_dataframe_anova_wt_6mo_22mo_after_anova$unlist.final_statistics_anova_wt_6mo_22mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova <- final_aov_dataframe_anova_wt_6mo_22mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_wt_6mo_22mo_after_anova$unlist.final_statistics_anova_wt_6mo_22mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_wt_6mo_22mo_after_anova <- final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova[final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo and 22mo wt for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_wt_6mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/6mo_vs_22mo_wt_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt[, ion] ~ factor(treatment_final_wt_6mo_22mo, levels = c('6mo', '22mo')), main="Ion distribution wt 6mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_wt_6mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/6mo_vs_22mo_wt_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt[, ion] ~ factor(treatment_final_wt_6mo_22mo, levels = c('6mo', '22mo')), main="Ion distribution wt 6mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we statistically test the 12mo and 22mo WT.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "208_5wt|209_2wt|278_a2_wt|191_a3wt|252_8_wt|268_a3_wt",]
+treatment_final_wt_12mo_22mo <- c("12mo", "12mo", "22mo", "22mo", "22mo", "12mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_wt_12mo_22mo_after_anova <- list()
+
+final_statistics_anova_wt_12mo_22mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt[,i], treatment_final_wt_12mo_22mo)
+    aov_test <- aov(metabolite ~ treatment_final_wt_12mo_22mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_wt_12mo_22mo_after_anova[[length(aov_pval_list_wt_12mo_22mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_wt_12mo_22mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt), unlist(final_statistics_anova_wt_12mo_22mo_after_anova))
+
+significant_aov_dataframe_anova_wt_12mo_22mo_after_anova <- final_aov_dataframe_anova_wt_12mo_22mo_after_anova[final_aov_dataframe_anova_wt_12mo_22mo_after_anova$unlist.final_statistics_anova_wt_12mo_22mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova <- final_aov_dataframe_anova_wt_12mo_22mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_wt_12mo_22mo_after_anova$unlist.final_statistics_anova_wt_12mo_22mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_wt_12mo_22mo_after_anova <- final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova[final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 12mo and 22mo wt for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_wt_12mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/12mo_vs_22mo_wt_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt[, ion] ~ factor(treatment_final_wt_12mo_22mo, levels = c('12mo', '22mo')), main="Ion distribution wt 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_wt_12mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/12mo_vs_22mo_wt_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt[, ion] ~ factor(treatment_final_wt_12mo_22mo, levels = c('12mo', '22mo')), main="Ion distribution wt 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we statistically test the 6mo and 12mo tg.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_3tg|225_a2tg|226_a1tg|210_a1tg|270_a1_Tg|270_5_Tg",]
+treatment_final_tg_6mo_12mo <- c("6mo", "6mo", "6mo", "12mo", "12mo", "12mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_tg_6mo_12mo_after_anova <- list()
+
+final_statistics_anova_tg_6mo_12mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg[,i], treatment_final_tg_6mo_12mo)
+    aov_test <- aov(metabolite ~ treatment_final_tg_6mo_12mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_tg_6mo_12mo_after_anova[[length(aov_pval_list_tg_6mo_12mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_tg_6mo_12mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg), unlist(final_statistics_anova_tg_6mo_12mo_after_anova))
+
+significant_aov_dataframe_anova_tg_6mo_12mo_after_anova <- final_aov_dataframe_anova_tg_6mo_12mo_after_anova[final_aov_dataframe_anova_tg_6mo_12mo_after_anova$unlist.final_statistics_anova_tg_6mo_12mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova <- final_aov_dataframe_anova_tg_6mo_12mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_tg_6mo_12mo_after_anova$unlist.final_statistics_anova_tg_6mo_12mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_tg_6mo_12mo_after_anova <- final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova[final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo and 12mo tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_tg_6mo_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/6mo_vs_12mo_tg_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg[, ion] ~ factor(treatment_final_tg_6mo_12mo, levels = c('6mo', '12mo')), main="Ion distribution tg 6mo vs 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_tg_6mo_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/6mo_vs_12mo_tg_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg[, ion] ~ factor(treatment_final_tg_6mo_12mo, levels = c('6mo', '12mo')), main="Ion distribution tg 6mo vs 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we statistically test the 6mo and 22mo tg.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_3tg|225_a2tg|226_a1tg|249_4_Tg|256_a3_Tg|268_3_Tg",]
+treatment_final_tg_6mo_22mo <- c("6mo", "6mo", "6mo", "22mo", "22mo", "22mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_tg_6mo_22mo_after_anova <- list()
+
+final_statistics_anova_tg_6mo_22mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg[,i], treatment_final_tg_6mo_22mo)
+    aov_test <- aov(metabolite ~ treatment_final_tg_6mo_22mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_tg_6mo_22mo_after_anova[[length(aov_pval_list_tg_6mo_22mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_tg_6mo_22mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg), unlist(final_statistics_anova_tg_6mo_22mo_after_anova))
+
+significant_aov_dataframe_anova_tg_6mo_22mo_after_anova <- final_aov_dataframe_anova_tg_6mo_22mo_after_anova[final_aov_dataframe_anova_tg_6mo_22mo_after_anova$unlist.final_statistics_anova_tg_6mo_22mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova <- final_aov_dataframe_anova_tg_6mo_22mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_tg_6mo_22mo_after_anova$unlist.final_statistics_anova_tg_6mo_22mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_tg_6mo_22mo_after_anova <- final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova[final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo and 22mo tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_tg_6mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/6mo_vs_22mo_tg_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg[, ion] ~ factor(treatment_final_tg_6mo_22mo, levels = c('6mo', '22mo')), main="Ion distribution tg 6mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_tg_6mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/6mo_vs_22mo_tg_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg[, ion] ~ factor(treatment_final_tg_6mo_22mo, levels = c('6mo', '22mo')), main="Ion distribution tg 6mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we statistically test the 12mo and 22mo tg.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "210_a1tg|270_a1_Tg|270_5_Tg|249_4_Tg|256_a3_Tg|268_3_Tg",]
+treatment_final_tg_12mo_22mo <- c("12mo", "12mo", "12mo", "22mo", "22mo", "22mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_tg_12mo_22mo_after_anova <- list()
+
+final_statistics_anova_tg_12mo_22mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg[,i], treatment_final_tg_12mo_22mo)
+    aov_test <- aov(metabolite ~ treatment_final_tg_12mo_22mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_tg_12mo_22mo_after_anova[[length(aov_pval_list_tg_12mo_22mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_tg_12mo_22mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg), unlist(final_statistics_anova_tg_12mo_22mo_after_anova))
+
+significant_aov_dataframe_anova_tg_12mo_22mo_after_anova <- final_aov_dataframe_anova_tg_12mo_22mo_after_anova[final_aov_dataframe_anova_tg_12mo_22mo_after_anova$unlist.final_statistics_anova_tg_12mo_22mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova <- final_aov_dataframe_anova_tg_12mo_22mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_tg_12mo_22mo_after_anova$unlist.final_statistics_anova_tg_12mo_22mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_tg_12mo_22mo_after_anova <- final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova[final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 12mo and 22mo tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_tg_12mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/12mo_vs_22mo_tg_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg[, ion] ~ factor(treatment_final_tg_12mo_22mo, levels = c('12mo', '22mo')), main="Ion distribution tg 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_tg_12mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg.){
+png(filename=paste("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots Filtered By Anova Within Phenotype Testing/12mo_vs_22mo_tg_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg[, ion] ~ factor(treatment_final_tg_12mo_22mo, levels = c('12mo', '22mo')), main="Ion distribution tg 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we save the statistical results.
+
+```{r}
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova) == "unlist.final_statistics_anova_wt_6mo_12mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Within Phenotype Testing/AGE_negative_whole_brain_6mo_vs_12mo_wt_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova) == "unlist.final_statistics_anova_wt_6mo_22mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Within Phenotype Testing/AGE_negative_whole_brain_6mo_vs_22mo_wt_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova) == "unlist.final_statistics_anova_wt_12mo_22mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Within Phenotype Testing/AGE_negative_whole_brain_12mo_vs_22mo_wt_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova) == "unlist.final_statistics_anova_tg_6mo_12mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Within Phenotype Testing/AGE_negative_whole_brain_6mo_vs_12mo_tg_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova) == "unlist.final_statistics_anova_tg_6mo_22mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Within Phenotype Testing/AGE_negative_whole_brain_6mo_vs_22mo_tg_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova) == "unlist.final_statistics_anova_tg_12mo_22mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova, 'D:/NEW All AGE Negative masks and roi sums/Whole Brains/Whole Brain Statistical Testing Results Within Phenotype Testing/AGE_negative_whole_brain_12mo_vs_22mo_tg_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+```
+
+
+# Making Pretty Plots for Publication
+
+Below we run combat batch correction without standardizing the data.
+
+```{r}
+# Create single summarized experiment object
+SE_batches_final_not_standardized <- SummarizedExperiment(assays=list(counts= as.matrix(final_data_for_maplet)), colData = data_for_coldata_final, rowData = data.frame(name=rownames(final_data_for_maplet)))
+
+SE_batches_final_not_standardized_combat <- SE_batches_final_not_standardized %>% 
+  mt_clean_validate_se() %>%
+  mt_load_flag_logged() %>%
+  mt_pre_batch_combat(batch_col = "batch_groups_final")
+
+# Make vector for batches
+batch_data <- SE_batches_final_not_standardized_combat$batch_groups_final
+
+final_assay <- assay(SE_batches_final_not_standardized_combat)
+processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized <- t(final_assay)
+
+```
+
+Below we make a boxplot for ion 776.5504
+
+```{r}
+# make dataframe with remaining ions after filtering with all data
+processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized_filtered_by_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "776.5504"] ="Mol %"
+
+# Specify statistical comparisons
+my_comparisons <- list(c("wt_6mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_776_5504_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 776.5504 [-]') +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  stat_compare_means(comparisons = my_comparisons, method = 't.test', symnum.args=list(cutpoints = c(0, 0.2), symbols = c("*"))) +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 124.0071
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "124.0071"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_124_0071_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 124.0071 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 145.0612
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "145.0612"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_145_0612_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 145.0612 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 327.2329
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "327.2329"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_327_2329_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 327.2329 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 328.2227
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "328.2227"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_328_2227_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 328.2227 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 329.2451
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "329.2451"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_329_2451_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 329.2451 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 301.2172
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "301.2172"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_301_2172_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 301.2172 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 600.5060
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "600.5060"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_600_5060_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 600.5060 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 601.5093
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "601.5093"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_601_5093_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 601.5093 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 602.5082
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "602.5082"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_602_5082_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 602.5082 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 673.4799
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "673.4799"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_673_4799_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 673.4799 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 674.4805
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "674.4805"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_674_4805_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 674.4805 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 683.4949
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "683.4949"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_683_4949_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 683.4949 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 685.5149
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "685.5149"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_685_5149_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 685.5149 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 700.5164
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "700.5164"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_700_5164_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 700.5164 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 701.5121
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "701.5121"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_701_5121_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 701.5121 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 702.5150
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "702.5150"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_702_5150_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 702.5150 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 724.5035
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "724.5035"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_724_5035_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 724.5035 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 725.5073
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "725.5073"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_725_5073_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 725.5073 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 726.5419
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "726.5419"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_726_5419_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 726.5419 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 727.5335
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "727.5335"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_727_5335_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 727.5335 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 728.5511
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "728.5511"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_728_5511_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 728.5511 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 746.5150
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "746.5150"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_746_5150_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 746.5150 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 748.5185
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "748.5185"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_748_5185_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 748.5185 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 749.5189
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "749.5189"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_749_5189_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 749.5189 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 750.5399
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "750.5399"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_750_5399_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 750.5399 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 751.5354
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "751.5354"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_751_5354_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 751.5354 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 762.5073
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "762.5073"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_762_5073_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 762.5073 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 763.5109
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "763.5109"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_763_5109_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 763.5109 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 764.5199
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "764.5199"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_764_5199_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 764.5199 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 766.5374
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "766.5374"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_766_5374_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 766.5374 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 768.5317
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "768.5317"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_768_5317_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 768.5317 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 772.5316
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "772.5316"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_772_5316_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 772.5316 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 773.5358
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "773.5358"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_773_5358_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 773.5358 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 775.5443
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "775.5443"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_775_5443_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 775.5443 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 778.5600
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "776.5504"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_778_5600_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 778.5600 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 792.5430
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "792.5430"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_792_5430_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 792.5430 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 701.5146
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "701.5146"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_701_5146_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 701.5146 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
+
+Below we make a boxplot for ion 331.2636
+
+```{r}
+# Make dataframe for ggplot
+dataframe_final <- data.frame(processed_metabolite_values_combat_final_sample_by_metabolite_not_standardized)
+# Remove X from column names
+names(dataframe_final) <- sub("^X", "", names(dataframe_final))
+# Add column of phenotypes
+dataframe_final$phenotype <- treatment_final_all
+# Change name of column
+colnames(dataframe_final)[colnames(dataframe_final) == "331.2636"] ="Mol %"
+
+# Specify statistical comparisons
+#my_comparisons <- list(c("wt_12mo", "wt_22mo"))
+
+tiff("D:/NEW All AGE Negative masks and roi sums/Whole Brains/Boxplots For Paper/negative_whole_brain_331_2636_boxplot.tiff", units="in", width=5, height=5, res=300)
+
+# make boxplot
+ggboxplot(dataframe_final, x = "phenotype", y = 'Mol %', color = "phenotype", 
+          add = "jitter", legend = "none", xlab = "") + 
+  ggtitle('m/z: 331.2636 [-]') +
+  theme(plot.title = element_text(hjust = 0.5))  +
+  scale_x_discrete(limits=c("wt_6mo", "tg_6mo", "wt_12mo", "tg_12mo", "wt_22mo", "tg_22mo"),labels=c("WT", "APPsw", "WT", "APPsw", "WT", "APPsw")) + 
+      coord_cartesian(clip = 'off') +
+    geom_text( size = 6, aes(x = c(1.1, 0, 0, 0, 0, 0, 3.1, 0, 0, 0, 0, 0, 5.1, 0, 0, 0, 0, 0), y = 0, label = c("6mo", "", "", "", "", "", "12mo", "", "", "", "", "", "22mo", "", "", "", "", ""),
+    hjust = 0, vjust = 4)) + 
+  theme(axis.title.y = element_text(color = "grey20", size = 20)) + 
+  theme(axis.text.x = element_text(color = "grey20", size = 15)) + 
+    theme(axis.text.y = element_text(color = "grey20", size = 15))
+dev.off()
+```
