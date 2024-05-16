@@ -1,0 +1,1309 @@
+---
+title: "AGE positive batch correction and stats hypothalamus whole brain ions"
+output: html_document
+date: "2023-08-22"
+---
+
+# Install Packages 
+
+```{r}
+library(maplet)
+library(magrittr)
+library(dplyr)
+library(tidyverse)
+library(car)
+library(data.table)
+require(plyr)
+```
+
+# Import Data and normalize brains percentage to pixel sizes
+
+Below we import the data.
+
+```{r}
+percentage_of_ion_intensities_roi_191_a3_WT_s4_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/191_a3_WT_s4_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_191_a3_WT_s4_hypothalamus_df)[1] = "191_a3_WT_s4"
+# Make row names into column
+percentage_of_ion_intensities_roi_191_a3_WT_s4_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_191_a3_WT_s4_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_226_a1_Tg_s3_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/226_a1_Tg_s3_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_226_a1_Tg_s3_hypothalamus_df)[1] = "226_a1_Tg_s3"
+# Make row names into column
+percentage_of_ion_intensities_roi_226_a1_Tg_s3_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_226_a1_Tg_s3_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_225_a1wt_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/225_a1wt_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_225_a1wt_hypothalamus_df)[1] = "225_a1wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_225_a1wt_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_225_a1wt_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_208_5wt_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/208_5wt_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_208_5wt_hypothalamus_df)[1] = "208_5wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_208_5wt_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_208_5wt_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_209_2wt_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/209_2wt_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_209_2wt_hypothalamus_df)[1] = "209_2wt"
+# Make row names into column
+percentage_of_ion_intensities_roi_209_2wt_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_209_2wt_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_226_a2_WT_s4_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/226_a2_WT_s4_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_226_a2_WT_s4_hypothalamus_df)[1] = "226_a2_WT_s4"
+# Make row names into column
+percentage_of_ion_intensities_roi_226_a2_WT_s4_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_226_a2_WT_s4_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_249_4_Tg_s3_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/249_4_Tg_s3_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_249_4_Tg_s3_hypothalamus_df)[1] = "249_4_Tg_s3"
+# Make row names into column
+percentage_of_ion_intensities_roi_249_4_Tg_s3_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_249_4_Tg_s3_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_256_2_WT_s4_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/256_2_WT_s4_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_256_2_WT_s4_hypothalamus_df)[1] = "256_2_WT_s4"
+# Make row names into column
+percentage_of_ion_intensities_roi_256_2_WT_s4_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_256_2_WT_s4_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_256_a3_Tg_s3_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/256_a3_Tg_s3_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_256_a3_Tg_s3_hypothalamus_df)[1] = "256_a3_Tg_s3"
+# Make row names into column
+percentage_of_ion_intensities_roi_256_a3_Tg_s3_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_256_a3_Tg_s3_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_268_3_Tg_s5_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/268_3_Tg_s5_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_268_3_Tg_s5_hypothalamus_df)[1] = "268_3_Tg_s5"
+# Make row names into column
+percentage_of_ion_intensities_roi_268_3_Tg_s5_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_268_3_Tg_s5_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_268_a3_WT_s3_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/268_a3_WT_s3_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_268_a3_WT_s3_hypothalamus_df)[1] = "268_a3_WT_s3"
+# Make row names into column
+percentage_of_ion_intensities_roi_268_a3_WT_s3_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_268_a3_WT_s3_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_225_3tg_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/225_3tg_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_225_3tg_hypothalamus_df)[1] = "225_3tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_225_3tg_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_225_3tg_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_270_5_Tg_s5_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/270_5_Tg_s5_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_270_5_Tg_s5_hypothalamus_df)[1] = "270_5_Tg_s5"
+# Make row names into column
+percentage_of_ion_intensities_roi_270_5_Tg_s5_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_270_5_Tg_s5_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_271_a3_Tg_s3_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/271_a3_Tg_s3_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_271_a3_Tg_s3_hypothalamus_df)[1] = "271_a3_Tg_s3"
+# Make row names into column
+percentage_of_ion_intensities_roi_271_a3_Tg_s3_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_271_a3_Tg_s3_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_210_a1tg_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/210_a1tg_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_210_a1tg_hypothalamus_df)[1] = "210_a1tg"
+# Make row names into column
+percentage_of_ion_intensities_roi_210_a1tg_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_210_a1tg_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_278_a2_WT_s2_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/278_a2_WT_s2_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_278_a2_WT_s2_hypothalamus_df)[1] = "278_a2_WT_s2"
+# Make row names into column
+percentage_of_ion_intensities_roi_278_a2_WT_s2_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_278_a2_WT_s2_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_308_3_Tg_s5_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/308_3_Tg_s5_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_308_3_Tg_s5_hypothalamus_df)[1] = "308_3_Tg_s5"
+# Make row names into column
+percentage_of_ion_intensities_roi_308_3_Tg_s5_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_308_3_Tg_s5_hypothalamus_df)
+
+percentage_of_ion_intensities_roi_308_4_WT_s2_hypothalamus_df <- read.csv('D:/All AGE Positive masks and roi sums/Average Hypothalamus/308_4_WT_s2_percentage_of_ions_within_hypothalamus.csv', row.names = 1)
+# Rename column
+colnames(percentage_of_ion_intensities_roi_308_4_WT_s2_hypothalamus_df)[1] = "308_4_WT_s2"
+# Make row names into column
+percentage_of_ion_intensities_roi_308_4_WT_s2_hypothalamus_df$ions <- rownames(percentage_of_ion_intensities_roi_308_4_WT_s2_hypothalamus_df)
+```
+
+Below we combine all the normalized percentage.
+
+```{r}
+dfs_to_merge <- list(percentage_of_ion_intensities_roi_191_a3_WT_s4_hypothalamus_df, percentage_of_ion_intensities_roi_226_a1_Tg_s3_hypothalamus_df, percentage_of_ion_intensities_roi_225_a1wt_hypothalamus_df, percentage_of_ion_intensities_roi_208_5wt_hypothalamus_df, percentage_of_ion_intensities_roi_209_2wt_hypothalamus_df, percentage_of_ion_intensities_roi_226_a2_WT_s4_hypothalamus_df, percentage_of_ion_intensities_roi_249_4_Tg_s3_hypothalamus_df, percentage_of_ion_intensities_roi_256_2_WT_s4_hypothalamus_df, percentage_of_ion_intensities_roi_256_a3_Tg_s3_hypothalamus_df, percentage_of_ion_intensities_roi_268_3_Tg_s5_hypothalamus_df, percentage_of_ion_intensities_roi_268_a3_WT_s3_hypothalamus_df, percentage_of_ion_intensities_roi_225_3tg_hypothalamus_df, percentage_of_ion_intensities_roi_270_5_Tg_s5_hypothalamus_df, percentage_of_ion_intensities_roi_271_a3_Tg_s3_hypothalamus_df, percentage_of_ion_intensities_roi_210_a1tg_hypothalamus_df, percentage_of_ion_intensities_roi_278_a2_WT_s2_hypothalamus_df, percentage_of_ion_intensities_roi_308_3_Tg_s5_hypothalamus_df, percentage_of_ion_intensities_roi_308_4_WT_s2_hypothalamus_df)
+# Merge all into one
+final_data_merged <- dfs_to_merge %>% reduce(full_join, by='ions')
+# make ions into rownames again
+rownames(final_data_merged) <- final_data_merged$ions
+# Remove ions column
+final_data_merged$ions <- NULL
+```
+
+
+# Creating Dataframe for Data Without Batch Correction
+
+```{r}
+# Below we create a vector to specify the groups 
+treatment_groups <- c("wt", "tg", "wt", "wt", "wt", "wt", "tg", "wt", 'tg', "tg", "wt", "tg", "tg", "tg", "tg", "wt", "tg", "wt")
+
+# Create a vector to represent decjan and august batches
+batch_groups <- c("decjan", "decjan", "august", "august", "august", "decjan", "decjan", "decjan", "decjan", "decjan", "decjan", "august", "decjan", "decjan", "august", "decjan", "decjan", "decjan")
+
+# Create dataframe of both columns describing data 
+data_for_coldata <- data.frame(treatment_groups, batch_groups)
+
+# Make into a matrix
+final_data_merged_matrix <- as.matrix(final_data_merged)
+```
+
+Below we run the pipeline without batch correction to see what the PCA looks like.
+
+```{r}
+# Make data into percentagemarized experiment object
+raw_SE <- SummarizedExperiment(assays=list(counts=final_data_merged_matrix), colData = data_for_coldata)
+# Put data through Maplet Pipeline
+processed_SE <- raw_SE %>%
+  mt_pre_trans_scale() %>% # Scale data (z-scores)
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() %>% # Impute missing values with knn imputation
+  mt_pre_filter_missingness(feat_max = 0.00001) # Filter any ions with missing values due to standarad deviations being 0 in knn imputation
+
+
+processed_SE <- processed_SE %>% 
+  mt_plots_pca(color = processed_SE$treatment_groups) %>% #Create PCA plot colored by treatment
+  mt_plots_pca(color = processed_SE$batch_groups) #Create PCA plot colored by batch
+```
+
+Plot the PCA below colored by treatment and batch.
+
+```{r}
+processed_SE@metadata$results$`plots_pca.82d2f43d-ec5f-419d-84ff-cd5a5ed1af5b`
+
+processed_SE@metadata$results$`plots_pca.71ac83e5-eaa6-4c8d-9840-bce64057c2c1`
+```
+
+# Combat Batch Correction
+
+1. create a SE for batch1 D1 ----
+2. preprocess and impute D1 ----
+3. create a SE D2 for batch2 -----
+4. preprocess and impute D2 ----
+5. merge preprocessed D1 and D2 and create a SE D ----
+6. apply combat batch correction ----
+
+```{r}
+# Split into decjan and august batch data
+august_data <- final_data_merged_matrix[, which(batch_groups == "august")]
+decjan_data <- final_data_merged_matrix[, which(batch_groups == "decjan")]
+
+# Create vector that represent "august" for august data and "decjan" for decjan data
+batch_groups_august <- c(rep("august", ncol(august_data)))
+batch_groups_decjan <- c(rep("decjan", ncol(decjan_data)))
+
+# Create vector that represent treatments for august data
+treatment_august <- treatment_groups[which(batch_groups == "august")]
+# Create vector that represent CRE and CSE for decjan data
+treatment_decjan <- treatment_groups[which(batch_groups == "decjan")]
+
+# Create dataframe of both columns describing august data 
+data_for_coldata_august <- data.frame(batch_groups_august, treatment_august)
+# Create dataframe of both columns describing decjan data 
+data_for_coldata_decjan <- data.frame(batch_groups_decjan, treatment_decjan)
+
+# Make data into summarized experiment object
+raw_SE_batch1 <- SummarizedExperiment(assays=list(counts=august_data), colData = data_for_coldata_august)
+# Put data through Maplet Pipeline
+processed_SE_batch1 <- raw_SE_batch1 %>%
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+
+# Make data into summarized experiment object
+raw_SE_batch2 <- SummarizedExperiment(assays=list(counts=decjan_data), colData = data_for_coldata_decjan)
+processed_SE_batch2 <- raw_SE_batch2 %>%
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+# Create dataframes of expression batch 1
+batch1_data <- processed_SE_batch1@assays@data$counts
+# Create dataframes of expression batch 2
+batch2_data <- processed_SE_batch2@assays@data$counts
+ 
+# Keep only m/z values in common between batches
+final_data_for_maplet <- merge(batch1_data, batch2_data, by = 'row.names')
+
+# Make m/z values rownames
+rownames(final_data_for_maplet) <- final_data_for_maplet$Row.names
+# Remove m/z column
+final_data_for_maplet$Row.names <- NULL
+
+# Create vector that represent "august" for august data and "decjan" for decjan data
+batch_groups_final <- c(processed_SE_batch1$batch_groups_august, processed_SE_batch2$batch_groups_decjan)
+
+# Create vector that represent treatment for final data
+treatment_final <- c(treatment_august, treatment_decjan)
+
+# Create dataframe of both columns describing final data 
+data_for_coldata_final <- data.frame(batch_groups_final, treatment_final)
+
+# Create single summarized experiment object
+SE_batches_final <- SummarizedExperiment(assays=list(counts= as.matrix(final_data_for_maplet)), colData = data_for_coldata_final, rowData = data.frame(name=rownames(final_data_for_maplet)))
+
+SE_batches_final_combat <- SE_batches_final %>% 
+  mt_clean_validate_se() %>%
+  mt_load_flag_logged() %>%
+  mt_pre_batch_combat(batch_col = "batch_groups_final") %>% # Combat batch correction
+  mt_pre_trans_scale() %>%
+  mt_pre_filter_missingness(feat_max = 0.00001) # Filter any ions with missing values due to standarad deviations being 0 in knn imputation
+
+
+SE_batches_final_combat <- SE_batches_final_combat %>% 
+  mt_plots_pca(color = SE_batches_final_combat$batch_groups_final) %>% # Create PCA plot after batch correction colored by batch
+  mt_plots_pca(color = SE_batches_final_combat$treatment_final) %>% #Create PCA plot after batch correction colored by resistance type
+mt_plots_pca(color = SE_batches_final_combat$treatment_final, shape=batch_groups_final) # Create pca plot after batch correction colored by resistance type and shaped by batch
+
+# Make vector for batches
+batch_data <- SE_batches_final_combat$batch_groups_final
+
+final_assay <- assay(SE_batches_final_combat)
+
+```
+
+Below we create an object for the transposed data matrix after batch correction.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite <- t(final_assay)
+```
+
+Below we visualize all the PCA plots.
+
+```{r}
+SE_batches_final_combat@metadata$results$`plots_pca.2c446893-3078-4ee3-b277-c422ac396b90`
+
+SE_batches_final_combat@metadata$results$`plots_pca.fe38a674-5480-492b-a96b-0cdc10006609`
+
+SE_batches_final_combat@metadata$results$`plots_pca.da6442e1-3019-4eb8-aad4-df5b24fe16bb`
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different between batches after batch correction. 
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite[,i], batch_data)
+    aov_test <- aov(metabolite ~ batch_groups_final, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_batch <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite), unlist(final_statistics))
+
+significant_aov_dataframe_batch <- final_aov_dataframe_batch[final_aov_dataframe_batch$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_batch <- final_aov_dataframe_batch %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_batch$unlist.final_statistics., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_batch <- final_aov_dataframe_with_correction_batch[final_aov_dataframe_with_correction_batch$group_padj < 0.05, ]
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different. There are no significantly different metabolites between wt and Tg samples.
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+treatment_final_wt_vs_tg <- ifelse(treatment_final %like% "w", "wt", "tg")
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite[,i], treatment_final_wt_vs_tg)
+    aov_test <- aov(metabolite ~ treatment_final_wt_vs_tg, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+# Create dataframe of metabolites and their anova pvalues
+final_aov_dataframe <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite), unlist(final_statistics))
+
+# Create dataframe of unadjusted significant pvalues 
+significant_aov_dataframe <- final_aov_dataframe[final_aov_dataframe$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction <- final_aov_dataframe %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe$unlist.final_statistics., method = 'fdr'))
+
+# Create dataframe of adjusted significant pvalues 
+significant_aov_dataframe_with_correction <- final_aov_dataframe_with_correction[final_aov_dataframe_with_correction$group_padj < 0.05, ]
+```
+
+
+# Repeat with Median Batch Correction
+
+Below we run median batch correction - dividing each batch by its median for each ion and then combining the results.
+
+```{r}
+august_data <- final_data_merged_matrix[, which(batch_groups == "august")]
+median_august <- apply(august_data, 1, median, na.rm=TRUE)
+august_data_final <- august_data/median_august
+#Remove rows with NA's using na.omit()
+august_data_final <- na.omit(august_data_final)
+
+decjan_data <- final_data_merged_matrix[, which(batch_groups == "decjan")]
+median_decjan <- apply(decjan_data, 1, median, na.rm=TRUE)
+decjan_data_final <- decjan_data/median_decjan
+#Remove rows with NA's using na.omit()
+decjan_data_final <- na.omit(decjan_data_final)
+
+# Keep only m/z values in common between batches
+final_data_for_maplet <- merge(august_data_final, decjan_data_final, by = 'row.names')
+
+# Make m/z values rownames
+rownames(final_data_for_maplet) <- final_data_for_maplet$Row.names
+# Remove m/z column
+final_data_for_maplet$Row.names <- NULL
+
+# Create single summarized experiment object
+SE_batches_final <- SummarizedExperiment(assays=list(counts= as.matrix(final_data_for_maplet)), colData = data_for_coldata_final, rowData = data.frame(name=rownames(final_data_for_maplet)))
+
+SE_batches_final_median <- SE_batches_final %>% 
+  mt_pre_trans_scale() %>%
+  mt_pre_filter_missingness(feat_max = 0.00001) # Filter any ions with missing values due to standarad deviations being 0 in knn imputation
+
+SE_batches_final_median <- SE_batches_final_median %>% 
+  mt_plots_pca(color = SE_batches_final_median$batch_groups_final) %>% # Create PCA plot after batch correction colored by batch
+  mt_plots_pca(color = SE_batches_final_median$treatment_final) %>% #Create PCA plot after batch correction colored by resistance type
+mt_plots_pca(color = SE_batches_final_median$treatment_final, shape=batch_groups_final) # Create pca plot after batch correction colored by resistance type and shaped by batch
+
+# Make vector for batches
+batch_data <- SE_batches_final_median$batch_groups_final
+
+final_assay <- assay(SE_batches_final_median)
+```
+
+Below we visualize all the PCA plots.
+
+```{r}
+SE_batches_final_median@metadata$results$`plots_pca.67c56fee-a7b4-4330-afb0-e71e912cfa08`
+
+SE_batches_final_median@metadata$results$`plots_pca.3a86fde3-39f4-4ff2-b684-444e19402b25`
+
+SE_batches_final_median@metadata$results$`plots_pca.5b3d849f-b7a1-41fc-ac2c-3fbf448011df`
+```
+
+
+# Everything with filtered ions
+
+Below we import our filtered ions.
+
+```{r}
+filtered_ion_list <- read.csv('D:/All AGE Positive masks and roi sums/Whole Brains/two_sd_filtered_ions_no_noise.csv', row.names = 1)
+
+# Make mol % out of 100 for each sample
+final_data_merged_matrix_filtered <- final_data_merged_matrix[rownames(final_data_merged_matrix) %in% filtered_ion_list$X0, ]
+```
+
+Below we run the pipeline without batch correction to see what the PCA looks like.
+
+```{r}
+# Make data into summarized experiment object
+raw_SE <- SummarizedExperiment(assays=list(counts=final_data_merged_matrix_filtered), colData = data_for_coldata)
+# Put data through Maplet Pipeline
+processed_SE <- raw_SE %>%
+  mt_pre_trans_scale() %>% # Scale data (z-scores)
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+
+processed_SE <- processed_SE %>% 
+  mt_plots_pca(color = processed_SE$treatment_groups) %>% #Create PCA plot colored by treatment
+  mt_plots_pca(color = processed_SE$batch_groups) #Create PCA plot colored by batch
+```
+
+Plot the PCA below colored by treatment and batch.
+
+```{r}
+processed_SE@metadata$results$`plots_pca.9f79e01b-28ad-423e-906e-64aabb368735`
+
+processed_SE@metadata$results$`plots_pca.e7468872-3cff-4503-a4ed-2d837a93f9c0`
+```
+
+Below we run combat batch correction.
+
+```{r}
+august_data <- final_data_merged_matrix_filtered[, which(batch_groups == "august")]
+august_data_filtered <- august_data[rownames(august_data) %in% filtered_ion_list$X0, ]
+decjan_data <- final_data_merged_matrix_filtered[, which(batch_groups == "decjan")]
+decjan_data_filtered <- decjan_data[rownames(decjan_data) %in% filtered_ion_list$X0, ]
+
+# Make data into summarized experiment object
+raw_SE_batch1 <- SummarizedExperiment(assays=list(counts=august_data_filtered), colData = data_for_coldata_august)
+# Put data through Maplet Pipeline
+processed_SE_batch1 <- raw_SE_batch1 %>%
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+
+# Make data into summarized experiment object
+raw_SE_batch2 <- SummarizedExperiment(assays=list(counts=decjan_data_filtered), colData = data_for_coldata_decjan)
+processed_SE_batch2 <- raw_SE_batch2 %>%
+  mt_pre_outlier_to_na() %>% # Detect outliers (any values that lie outside the 0.025 and 0.975 regions when assuming a normal distribution)  and set to NA
+  mt_pre_impute_knn() # Impute missing values with knn imputation
+
+# Create dataframes of expression batch 1
+batch1_data <- processed_SE_batch1@assays@data$counts
+# Create dataframes of expression batch 2
+batch2_data <- processed_SE_batch2@assays@data$counts
+ 
+# Keep only m/z values in common between batches
+final_data_for_maplet <- merge(batch1_data, batch2_data, by = 'row.names')
+
+# Make m/z values rownames
+rownames(final_data_for_maplet) <- final_data_for_maplet$Row.names
+# Remove m/z column
+final_data_for_maplet$Row.names <- NULL
+
+# Create vector that represent "august" for august data and "decjan" for decjan data
+batch_groups_final <- c(processed_SE_batch1$batch_groups_august, processed_SE_batch2$batch_groups_decjan)
+
+# Create vector that represent treatment for final data
+treatment_final <- c(treatment_august, treatment_decjan)
+
+# Create dataframe of both columns describing final data 
+data_for_coldata_final <- data.frame(batch_groups_final, treatment_final)
+
+# Create single summarized experiment object
+SE_batches_final <- SummarizedExperiment(assays=list(counts= as.matrix(final_data_for_maplet)), colData = data_for_coldata_final, rowData = data.frame(name=rownames(final_data_for_maplet)))
+
+SE_batches_not_standardized_combat <- SE_batches_final %>% 
+  mt_clean_validate_se() %>%
+  mt_load_flag_logged() %>%
+  mt_pre_batch_combat(batch_col = "batch_groups_final") 
+assay_not_standardized <- assay(SE_batches_not_standardized_combat)
+write.csv(assay_not_standardized, "D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/AGE_positive_hypothalamus_combat_batch_corrected_percentages.csv")
+
+
+SE_batches_final_combat <- SE_batches_final %>% 
+  mt_clean_validate_se() %>%
+  mt_load_flag_logged() %>%
+  mt_pre_batch_combat(batch_col = "batch_groups_final") %>%
+  mt_pre_trans_scale()
+
+
+SE_batches_final_combat <- SE_batches_final_combat %>% 
+  mt_plots_pca(color = SE_batches_final_combat$batch_groups_final) %>% # Create PCA plot after batch correction colored by batch
+  mt_plots_pca(color = SE_batches_final_combat$treatment_final) %>% #Create PCA plot after batch correction colored by resistance type
+mt_plots_pca(color = SE_batches_final_combat$treatment_final, shape=batch_groups_final) # Create pca plot after batch correction colored by resistance type and shaped by batch
+
+# Make vector for batches
+batch_data <- SE_batches_final_combat$batch_groups_final
+
+final_assay <- assay(SE_batches_final_combat)
+```
+
+Below we create an object for the transposed data matrix after batch correction.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite <- t(final_assay)
+```
+
+Below we visualize all the PCA plots.
+
+```{r}
+SE_batches_final_combat@metadata$results$`plots_pca.9abdf282-e3c5-4673-9aef-45d083f31291`
+
+SE_batches_final_combat@metadata$results$`plots_pca.f7f7fedb-684e-48a1-af99-febde12cdfd2`
+
+SE_batches_final_combat@metadata$results$`plots_pca.c02844af-5c7e-4473-972f-89f265715cfb`
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different between batches after batch correction. 
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite[,i], batch_data)
+    aov_test <- aov(metabolite ~ batch_groups_final, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_batch <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite), unlist(final_statistics))
+
+significant_aov_dataframe_batch <- final_aov_dataframe_batch[final_aov_dataframe_batch$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_batch <- final_aov_dataframe_batch %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_batch$unlist.final_statistics., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_batch <- final_aov_dataframe_with_correction_batch[final_aov_dataframe_with_correction_batch$group_padj < 0.05, ]
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different. There are no significantly different metabolites between wt and Tg samples.
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+treatment_final_wt_vs_tg <- ifelse(treatment_final %like% "w", "wt", "tg")
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite[,i], treatment_final_wt_vs_tg)
+    aov_test <- aov(metabolite ~ treatment_final_wt_vs_tg, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+# Create dataframe of metabolites and their anova pvalues
+final_aov_dataframe <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite), unlist(final_statistics))
+
+# Create dataframe of unadjusted significant pvalues 
+significant_aov_dataframe <- final_aov_dataframe[final_aov_dataframe$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction <- final_aov_dataframe %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe$unlist.final_statistics., method = 'fdr'))
+
+# Create dataframe of adjusted significant pvalues 
+significant_aov_dataframe_with_correction <- final_aov_dataframe_with_correction[final_aov_dataframe_with_correction$group_padj < 0.05, ]
+```
+
+# Repeat with Median Batch Correction
+
+Below we run median batch correction - dividing each batch by its median for each ion and then combining the results.
+
+```{r}
+august_data <- final_data_merged_matrix_filtered[, which(batch_groups == "august")]
+median_august <- apply(august_data, 1, median, na.rm=TRUE)
+august_data_final <- august_data/median_august
+
+decjan_data <- final_data_merged_matrix_filtered[, which(batch_groups == "decjan")]
+median_decjan <- apply(decjan_data, 1, median, na.rm=TRUE)
+decjan_data_final <- decjan_data/median_decjan
+ 
+# Keep only m/z values in common between batches
+final_data_for_maplet <- merge(august_data_final, decjan_data_final, by = 'row.names')
+
+# Make m/z values rownames
+rownames(final_data_for_maplet) <- final_data_for_maplet$Row.names
+# Remove m/z column
+final_data_for_maplet$Row.names <- NULL
+
+# Create single summarized experiment object
+SE_batches_final <- SummarizedExperiment(assays=list(counts= as.matrix(final_data_for_maplet)), colData = data_for_coldata_final, rowData = data.frame(name=rownames(final_data_for_maplet)))
+
+# Save median batch correction matrix
+median_batch_corrected_data_ions_of_interest <- assay(SE_batches_final)
+
+SE_batches_final_median <- SE_batches_final %>% 
+  mt_pre_trans_scale()
+
+SE_batches_final_median <- SE_batches_final_median %>% 
+  mt_plots_pca(color = SE_batches_final_median$batch_groups_final) %>% # Create PCA plot after batch correction colored by batch
+  mt_plots_pca(color = SE_batches_final_median$treatment_final) %>% #Create PCA plot after batch correction colored by resistance type
+mt_plots_pca(color = SE_batches_final_median$treatment_final, shape=batch_groups_final) # Create pca plot after batch correction colored by resistance type and shaped by batch
+
+# Make vector for batches
+batch_data <- SE_batches_final_median$batch_groups_final
+
+final_assay <- assay(SE_batches_final_median)
+```
+
+Below we visualize all the PCA plots.
+
+```{r}
+SE_batches_final_median@metadata$results$`plots_pca.2028b0a3-037c-496a-926e-369f40cab2c9`
+
+SE_batches_final_median@metadata$results$`plots_pca.4060a7bc-b572-4f66-8fad-3d683997fe29`
+
+SE_batches_final_median@metadata$results$`plots_pca.6a42338d-3d3f-4b57-8744-8d6c6e636f94`
+```
+
+Below we create an object for the transposed data matrix after batch correction.
+
+```{r}
+processed_metabolite_values_median_final_sample_by_metabolite <- t(final_assay)
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different between batches after batch correction. 
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_median_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_median_final_sample_by_metabolite[,i], batch_data)
+    aov_test <- aov(metabolite ~ batch_groups_final, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_batch <- data.frame(colnames(processed_metabolite_values_median_final_sample_by_metabolite), unlist(final_statistics))
+
+significant_aov_dataframe_batch <- final_aov_dataframe_batch[final_aov_dataframe_batch$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_batch <- final_aov_dataframe_batch %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_batch$unlist.final_statistics., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_batch <- final_aov_dataframe_with_correction_batch[final_aov_dataframe_with_correction_batch$group_padj < 0.05, ]
+```
+
+Below we run an ANOVA to test if the distributions of metabolites are different. There are no significantly different metabolites between wt and Tg samples.
+
+```{r}
+# Make list for pvalues to be added to
+aov_pval_list <- list()
+treatment_final_wt_vs_tg <- ifelse(treatment_final %like% "w", "wt", "tg")
+
+final_statistics <- lapply(1:ncol(processed_metabolite_values_median_final_sample_by_metabolite), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_median_final_sample_by_metabolite[,i], treatment_final_wt_vs_tg)
+    aov_test <- aov(metabolite ~ treatment_final_wt_vs_tg, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list[[length(aov_pval_list) + 1]] <- aov_pval
+}) 
+  
+# Create dataframe of metabolites and their anova pvalues
+final_aov_dataframe <- data.frame(colnames(processed_metabolite_values_median_final_sample_by_metabolite), unlist(final_statistics))
+
+# Create dataframe of unadjusted significant pvalues 
+significant_aov_dataframe <- final_aov_dataframe[final_aov_dataframe$unlist.final_statistics. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction <- final_aov_dataframe %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe$unlist.final_statistics., method = 'fdr'))
+
+# Create dataframe of adjusted significant pvalues 
+significant_aov_dataframe_with_correction <- final_aov_dataframe_with_correction[final_aov_dataframe_with_correction$group_padj < 0.05, ]
+```
+
+# Statistical testing between specific phenotypes
+
+
+Below we run ANOVA to see if there are differences between all groups.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_anova_all <- processed_metabolite_values_combat_final_sample_by_metabolite
+# Create identification list for just tg light samples
+treatment_final_all <- c("wt_6mo", "wt_12mo", "wt_12mo", "tg_6mo", "tg_12mo", "wt_22mo", "tg_6mo", "wt_6mo", "tg_22mo", "wt_22mo", "tg_22mo", "tg_22mo", "wt_22mo", "tg_12mo", "tg_12mo", "wt_12mo", "tg_6mo", "wt_6mo")
+
+# Make list for pvalues to be added to
+aov_pval_list_all <- list()
+
+final_statistics_anova_all <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_anova_all), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_anova_all[,i], treatment_final_all)
+    aov_test <- aov(metabolite ~ treatment_final_all, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_all[[length(aov_pval_list_all) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_all <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_anova_all), unlist(final_statistics_anova_all))
+
+significant_aov_dataframe_anova_all <- final_aov_dataframe_anova_all[final_aov_dataframe_anova_all$unlist.final_statistics_anova_all. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_all <- final_aov_dataframe_anova_all %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_all$unlist.final_statistics_anova_all., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_all <- final_aov_dataframe_with_correction_anova_all[final_aov_dataframe_with_correction_anova_all$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo, 12mo, and 22mo for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/6mo_vs_12mo_vs_22mo_significant_all_ANOVA_ion_",ion,".png"))
+boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_anova_all[, ion] ~ factor(treatment_final_all, levels = c('wt_6mo', 'wt_12mo', 'wt_22mo', 'tg_6mo', 'tg_12mo', 'tg_22mo')), las = 2, main=paste("Ion distribution all groups", ion), xlab = "", ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we perform statistical testing for the 6mo mice with only the significant ions from the ANOVA with all groups.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_a1wt|225_3tg|226_a1_Tg_s3|226_a2_WT_s4|308_3_Tg_s5|308_4_WT_s2",]
+# Create subset of identification list for just 6mo light samples
+treatment_final_6mo <- c("wt", "tg", "tg", "wt", "tg", "wt")
+# Create subset for just 6mo light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_6mo[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+# Create subset of identification list for just 6mo light samples
+ttest_pval_list_6mo_after_anova <- list()
+final_statistics_6mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova), function(i){
+    ttest_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova[,i], treatment_final_6mo)
+    t_test <- t.test(metabolite ~ treatment_final_6mo, data = ttest_df, var.equal = TRUE)
+    ttest_pval <- t_test$p.value
+    ttest_pval_list_6mo_after_anova[[length(ttest_pval_list_6mo_after_anova) + 1]] <- ttest_pval
+})
+final_ttest_dataframe_6mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova), unlist(final_statistics_6mo_after_anova))
+significant_ttest_dataframe_6mo_after_anova <- final_ttest_dataframe_6mo_after_anova[final_ttest_dataframe_6mo_after_anova$unlist.final_statistics_6mo_after_anova. < 0.05, ]
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_ttest_dataframe_with_correction_6mo_after_anova <- final_ttest_dataframe_6mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_ttest_dataframe_6mo_after_anova$unlist.final_statistics_6mo_after_anova., method = 'fdr'))
+significant_ttest_dataframe_with_correction_6mo_after_anova <- final_ttest_dataframe_with_correction_6mo_after_anova[final_ttest_dataframe_with_correction_6mo_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for wt and Tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_ttest_dataframe_6mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/wt_vs_tg_significant_6mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo[, ion] ~ treatment_final_6mo, main="Ion distribution WT vs Tg 6mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+# Repeat for significant with correction
+for (ion in significant_ttest_dataframe_with_correction_6mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/wt_vs_tg_significant_with_correction_6mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo[, ion] ~ treatment_final_6mo, main="Ion distribution WT vs Tg 6mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we perform statistical testing for the 12mo mice with only the significant ions from the ANOVA with all groups.
+
+```{r}
+# Create subset for just 12mo light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "208_5wt|209_2wt|210_a1tg|270_5_Tg_s5|271_a3_Tg_s3|278_a2_WT_s2",]
+# Create subset of identification list for just 12mo light samples
+treatment_final_12mo <- c("wt", "wt", "tg", "tg", "tg", "wt")
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_12mo[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+# Create subset of identification list for just 12mo light samples
+ttest_pval_list_12mo_after_anova <- list()
+final_statistics_12mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova), function(i){
+    ttest_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova[,i], treatment_final_12mo)
+    t_test <- t.test(metabolite ~ treatment_final_12mo, data = ttest_df, var.equal = TRUE)
+    ttest_pval <- t_test$p.value
+    ttest_pval_list_12mo_after_anova[[length(ttest_pval_list_12mo_after_anova) + 1]] <- ttest_pval
+})
+final_ttest_dataframe_12mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova), unlist(final_statistics_12mo_after_anova))
+significant_ttest_dataframe_12mo_after_anova <- final_ttest_dataframe_12mo_after_anova[final_ttest_dataframe_12mo_after_anova$unlist.final_statistics_12mo_after_anova. < 0.05, ]
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_ttest_dataframe_with_correction_12mo_after_anova <- final_ttest_dataframe_12mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_ttest_dataframe_12mo_after_anova$unlist.final_statistics_12mo_after_anova., method = 'fdr'))
+significant_ttest_dataframe_with_correction_12mo_after_anova <- final_ttest_dataframe_with_correction_12mo_after_anova[final_ttest_dataframe_with_correction_12mo_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for wt and Tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_ttest_dataframe_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/wt_vs_tg_significant_12mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo[, ion] ~ treatment_final_12mo, main="Ion distribution WT vs Tg 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+# Repeat for significant with correction
+for (ion in significant_ttest_dataframe_with_correction_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/wt_vs_tg_significant_with_correction_12mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo[, ion] ~ treatment_final_12mo, main="Ion distribution WT vs Tg 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we perform statistical testing for the 22mo mice with only the significant ions from the ANOVA with all groups.
+
+```{r}
+# Create subset for just 22mo samples
+processed_metabolite_values_combat_final_sample_by_metabolite_22mo <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "191_a3_WT_s4|249_4_Tg_s3|256_2_WT_s4|256_a3_Tg_s3|268_3_Tg_s5|268_a3_WT_s3",]
+# Create subset of identification list for just 22mo light samples
+treatment_final_22mo <- c("wt", "tg", "wt", "tg", "tg", "wt")
+processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_22mo[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+# Create subset of identification list for just 22mo light samples
+ttest_pval_list_22mo_after_anova <- list()
+final_statistics_22mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova), function(i){
+    ttest_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova[,i], treatment_final_22mo)
+    t_test <- t.test(metabolite ~ treatment_final_22mo, data = ttest_df, var.equal = TRUE)
+    ttest_pval <- t_test$p.value
+    ttest_pval_list_22mo_after_anova[[length(ttest_pval_list_22mo_after_anova) + 1]] <- ttest_pval
+})
+final_ttest_dataframe_22mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova), unlist(final_statistics_22mo_after_anova))
+significant_ttest_dataframe_22mo_after_anova <- final_ttest_dataframe_22mo_after_anova[final_ttest_dataframe_22mo_after_anova$unlist.final_statistics_22mo_after_anova. < 0.05, ]
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_ttest_dataframe_with_correction_22mo_after_anova <- final_ttest_dataframe_22mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_ttest_dataframe_22mo_after_anova$unlist.final_statistics_22mo_after_anova., method = 'fdr'))
+significant_ttest_dataframe_with_correction_22mo_after_anova <- final_ttest_dataframe_with_correction_22mo_after_anova[final_ttest_dataframe_with_correction_22mo_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for wt and Tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_ttest_dataframe_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/wt_vs_tg_significant_22mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_22mo[, ion] ~ treatment_final_22mo, main="Ion distribution WT vs Tg 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+# Repeat for significant with correction
+for (ion in significant_ttest_dataframe_with_correction_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/wt_vs_tg_significant_with_correction_22mo_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_22mo[, ion] ~ treatment_final_22mo, main="Ion distribution WT vs Tg 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we run ANOVA to see if there are differences between wt over time.
+
+```{r}
+# Create subset for just wt light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_a1wt|208_5wt|209_2wt|191_a3_WT_s4|226_a2_WT_s4|256_2_WT_s4|268_a3_WT_s3|278_a2_WT_s2|308_4_WT_s2",]
+# Create subset of identification list for just wt light samples
+treatment_final_wt <- c("6mo", "12mo", "12mo", "22mo", "6mo", "22mo", "22mo", "12mo", "6mo")
+# Create subset for just 12mo light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_wt_after_anova <- list()
+
+final_statistics_anova_wt_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova[,i], treatment_final_wt)
+    aov_test <- aov(metabolite ~ treatment_final_wt, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_wt_after_anova[[length(aov_pval_list_wt_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_wt_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova), unlist(final_statistics_anova_wt_after_anova))
+
+significant_aov_dataframe_anova_wt_after_anova <- final_aov_dataframe_anova_wt_after_anova[final_aov_dataframe_anova_wt_after_anova$unlist.final_statistics_anova_wt_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_wt_after_anova <- final_aov_dataframe_anova_wt_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_wt_after_anova$unlist.final_statistics_anova_wt_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_wt_after_anova <- final_aov_dataframe_with_correction_anova_wt_after_anova[final_aov_dataframe_with_correction_anova_wt_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo, 12mo, and 22mo for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_wt_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/6mo_vs_12mo_vs_22mo_significant_wt_ANOVA_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt[, ion] ~ factor(treatment_final_wt, levels = c('6mo', '12mo', '22mo')), main="Ion distribution WT 6mo vs 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+# Repeat for significant with correction
+for (ion in significant_aov_dataframe_with_correction_anova_wt_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/6mo_vs_12mo_vs_22mo_significant_with_correction_wt_ANOVA_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova[, ion] ~ factor(treatment_final_wt, levels = c('6mo', '12mo', '22mo')), main="Ion distribution WT 6mo vs 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we run ANOVA to see if there are differences between tg over time.
+
+```{r}
+# Create subset for just tg light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_3tg|210_a1tg|226_a1_Tg_s3|249_4_Tg_s3|256_a3_Tg_s3|268_3_Tg_s5|270_5_Tg_s5|271_a3_Tg_s3|308_3_Tg_s5",]
+# Create subset of identification list for just tg light samples
+treatment_final_tg <- c("6mo", "12mo", "6mo", "22mo", "22mo", "22mo", "12mo", "12mo", "6mo")
+# Create subset for just 12mo light samples
+processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova <- processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg[, significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_tg_after_anova <- list()
+
+final_statistics_anova_tg_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova[,i], treatment_final_tg)
+    aov_test <- aov(metabolite ~ treatment_final_tg, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_tg_after_anova[[length(aov_pval_list_tg_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_tg_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova), unlist(final_statistics_anova_tg_after_anova))
+
+significant_aov_dataframe_anova_tg_after_anova <- final_aov_dataframe_anova_tg_after_anova[final_aov_dataframe_anova_tg_after_anova$unlist.final_statistics_anova_tg_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_tg_after_anova <- final_aov_dataframe_anova_tg_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_tg_after_anova$unlist.final_statistics_anova_tg_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_tg_after_anova <- final_aov_dataframe_with_correction_anova_tg_after_anova[final_aov_dataframe_with_correction_anova_tg_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo, 12mo, and 22mo for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_tg_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/6mo_vs_12mo_vs_22mo_significant_tg_ANOVA_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg[, ion] ~ factor(treatment_final_tg, levels = c('6mo', '12mo', '22mo')), main="Ion distribution tg 6mo vs 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+# Repeat for significant with correction
+for (ion in significant_aov_dataframe_with_correction_anova_tg_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots/6mo_vs_12mo_vs_22mo_significant_with_correction_tg_ANOVA_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova[, ion] ~ factor(treatment_final_tg, levels = c('6mo', '12mo', '22mo')), main="Ion distribution tg 6mo vs 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we save the statistical results.
+
+```{r}
+colnames(final_aov_dataframe_with_correction_anova_all)[colnames(final_aov_dataframe_with_correction_anova_all) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_all)[colnames(final_aov_dataframe_with_correction_anova_all) == "unlist.final_statistics_anova_all."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_all)[colnames(final_aov_dataframe_with_correction_anova_all) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_all, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Normalized By Pixel/AGE_hypothalamus_all_samples_ANOVA_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_ttest_dataframe_with_correction_6mo_after_anova)[colnames(final_ttest_dataframe_with_correction_6mo_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_after_anova."] = "ion"
+colnames(final_ttest_dataframe_with_correction_6mo_after_anova)[colnames(final_ttest_dataframe_with_correction_6mo_after_anova) == "unlist.final_statistics_6mo_after_anova."] = "pval"
+colnames(final_ttest_dataframe_with_correction_6mo_after_anova)[colnames(final_ttest_dataframe_with_correction_6mo_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_ttest_dataframe_with_correction_6mo_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Normalized By Pixel/AGE_6mo_hypothalamus_wt_vs_tg_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_ttest_dataframe_with_correction_12mo_after_anova)[colnames(final_ttest_dataframe_with_correction_12mo_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_after_anova."] = "ion"
+colnames(final_ttest_dataframe_with_correction_12mo_after_anova)[colnames(final_ttest_dataframe_with_correction_12mo_after_anova) == "unlist.final_statistics_12mo_after_anova."] = "pval"
+colnames(final_ttest_dataframe_with_correction_12mo_after_anova)[colnames(final_ttest_dataframe_with_correction_12mo_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_ttest_dataframe_with_correction_12mo_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Normalized By Pixel/AGE_12mo_hypothalamus_wt_vs_tg_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_ttest_dataframe_with_correction_22mo_after_anova)[colnames(final_ttest_dataframe_with_correction_22mo_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_22mo_after_anova."] = "ion"
+colnames(final_ttest_dataframe_with_correction_22mo_after_anova)[colnames(final_ttest_dataframe_with_correction_22mo_after_anova) == "unlist.final_statistics_22mo_after_anova."] = "pval"
+colnames(final_ttest_dataframe_with_correction_22mo_after_anova)[colnames(final_ttest_dataframe_with_correction_22mo_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_ttest_dataframe_with_correction_22mo_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Normalized By Pixel/AGE_22mo_hypothalamus_wt_vs_tg_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_wt_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_wt_after_anova."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_wt_after_anova) == "unlist.final_statistics_anova_wt_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_wt_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_wt_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Normalized By Pixel/AGE_hypothalamus_wt_ANOVA_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_tg_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_tg_after_anova."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_tg_after_anova) == "unlist.final_statistics_anova_tg_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_tg_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_tg_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Normalized By Pixel/AGE_hypothalamus_tg_ANOVA_filtered_ions_statistical_results.csv', row.names=FALSE)
+```
+
+# Testing specific wild type and Tg
+
+Below we statistically test the 6mo and 12mo WT.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "225_a1wt|226_a2_WT_s4|308_4_WT_s2|208_5wt|209_2wt|278_a2_WT_s2",]
+treatment_final_wt_6mo_12mo <- c("6mo", "12mo", "12mo", "6mo", "12mo", "6mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_wt_6mo_12mo_after_anova <- list()
+
+final_statistics_anova_wt_6mo_12mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt[,i], treatment_final_wt_6mo_12mo)
+    aov_test <- aov(metabolite ~ treatment_final_wt_6mo_12mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_wt_6mo_12mo_after_anova[[length(aov_pval_list_wt_6mo_12mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_wt_6mo_12mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt), unlist(final_statistics_anova_wt_6mo_12mo_after_anova))
+
+significant_aov_dataframe_anova_wt_6mo_12mo_after_anova <- final_aov_dataframe_anova_wt_6mo_12mo_after_anova[final_aov_dataframe_anova_wt_6mo_12mo_after_anova$unlist.final_statistics_anova_wt_6mo_12mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova <- final_aov_dataframe_anova_wt_6mo_12mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_wt_6mo_12mo_after_anova$unlist.final_statistics_anova_wt_6mo_12mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_wt_6mo_12mo_after_anova <- final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova[final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo and 12mo wt for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_wt_6mo_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/6mo_vs_12mo_wt_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt[, ion] ~ factor(treatment_final_wt_6mo_12mo, levels = c('6mo', '12mo')), main="Ion distribution wt 6mo vs 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_wt_6mo_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/6mo_vs_12mo_wt_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt[, ion] ~ factor(treatment_final_wt_6mo_12mo, levels = c('6mo', '12mo')), main="Ion distribution wt 6mo vs 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we statistically test the 6mo and 22mo WT.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "226_a2_WT_s4|308_4_WT_s2|225_a1wt|191_a3_WT_s4|256_2_WT_s4|268_a3_WT_s3",]
+treatment_final_wt_6mo_22mo <- c("6mo", "22mo", "6mo", "22mo", "22mo", "6mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_wt_6mo_22mo_after_anova <- list()
+
+final_statistics_anova_wt_6mo_22mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt[,i], treatment_final_wt_6mo_22mo)
+    aov_test <- aov(metabolite ~ treatment_final_wt_6mo_22mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_wt_6mo_22mo_after_anova[[length(aov_pval_list_wt_6mo_22mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_wt_6mo_22mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt), unlist(final_statistics_anova_wt_6mo_22mo_after_anova))
+
+significant_aov_dataframe_anova_wt_6mo_22mo_after_anova <- final_aov_dataframe_anova_wt_6mo_22mo_after_anova[final_aov_dataframe_anova_wt_6mo_22mo_after_anova$unlist.final_statistics_anova_wt_6mo_22mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova <- final_aov_dataframe_anova_wt_6mo_22mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_wt_6mo_22mo_after_anova$unlist.final_statistics_anova_wt_6mo_22mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_wt_6mo_22mo_after_anova <- final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova[final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo and 22mo wt for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_wt_6mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/6mo_vs_22mo_wt_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt[, ion] ~ factor(treatment_final_wt_6mo_22mo, levels = c('6mo', '22mo')), main="Ion distribution wt 6mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_wt_6mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/6mo_vs_22mo_wt_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt[, ion] ~ factor(treatment_final_wt_6mo_22mo, levels = c('6mo', '22mo')), main="Ion distribution wt 6mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we statistically test the 12mo and 22mo WT.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "208_5wt|209_2wt|278_a2_WT_s2|191_a3_WT_s4|256_2_WT_s4|268_a3_WT_s3",]
+treatment_final_wt_12mo_22mo <- c("12mo", "12mo", "22mo", "22mo", "22mo", "12mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt <- processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_wt_12mo_22mo_after_anova <- list()
+
+final_statistics_anova_wt_12mo_22mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt[,i], treatment_final_wt_12mo_22mo)
+    aov_test <- aov(metabolite ~ treatment_final_wt_12mo_22mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_wt_12mo_22mo_after_anova[[length(aov_pval_list_wt_12mo_22mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_wt_12mo_22mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt), unlist(final_statistics_anova_wt_12mo_22mo_after_anova))
+
+significant_aov_dataframe_anova_wt_12mo_22mo_after_anova <- final_aov_dataframe_anova_wt_12mo_22mo_after_anova[final_aov_dataframe_anova_wt_12mo_22mo_after_anova$unlist.final_statistics_anova_wt_12mo_22mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova <- final_aov_dataframe_anova_wt_12mo_22mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_wt_12mo_22mo_after_anova$unlist.final_statistics_anova_wt_12mo_22mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_wt_12mo_22mo_after_anova <- final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova[final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 12mo and 22mo wt for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_wt_12mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/12mo_vs_22mo_wt_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt[, ion] ~ factor(treatment_final_wt_12mo_22mo, levels = c('12mo', '22mo')), main="Ion distribution wt 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_wt_12mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/12mo_vs_22mo_wt_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt[, ion] ~ factor(treatment_final_wt_12mo_22mo, levels = c('12mo', '22mo')), main="Ion distribution wt 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we statistically test the 6mo and 12mo tg.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "226_a1_Tg_s3|308_3_Tg_s5|225_3tg|270_5_Tg_s5|271_a3_Tg_s3|210_a1tg",]
+treatment_final_tg_6mo_12mo <- c("6mo", "12mo", "6mo", "12mo", "12mo", "6mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_tg_6mo_12mo_after_anova <- list()
+
+final_statistics_anova_tg_6mo_12mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg[,i], treatment_final_tg_6mo_12mo)
+    aov_test <- aov(metabolite ~ treatment_final_tg_6mo_12mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_tg_6mo_12mo_after_anova[[length(aov_pval_list_tg_6mo_12mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_tg_6mo_12mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg), unlist(final_statistics_anova_tg_6mo_12mo_after_anova))
+
+significant_aov_dataframe_anova_tg_6mo_12mo_after_anova <- final_aov_dataframe_anova_tg_6mo_12mo_after_anova[final_aov_dataframe_anova_tg_6mo_12mo_after_anova$unlist.final_statistics_anova_tg_6mo_12mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova <- final_aov_dataframe_anova_tg_6mo_12mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_tg_6mo_12mo_after_anova$unlist.final_statistics_anova_tg_6mo_12mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_tg_6mo_12mo_after_anova <- final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova[final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo and 12mo tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_tg_6mo_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/6mo_vs_12mo_tg_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg[, ion] ~ factor(treatment_final_tg_6mo_12mo, levels = c('6mo', '12mo')), main="Ion distribution tg 6mo vs 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_tg_6mo_12mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/6mo_vs_12mo_tg_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg[, ion] ~ factor(treatment_final_tg_6mo_12mo, levels = c('6mo', '12mo')), main="Ion distribution tg 6mo vs 12mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we statistically test the 6mo and 22mo tg.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "226_a1_Tg_s3|308_3_Tg_s5|225_3tg|249_4_Tg_s3|256_a3_Tg_s3|268_3_Tg_s5",]
+treatment_final_tg_6mo_22mo <- c("6mo", "6mo", "22mo", "22mo", "22mo", "6mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_tg_6mo_22mo_after_anova <- list()
+
+final_statistics_anova_tg_6mo_22mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg[,i], treatment_final_tg_6mo_22mo)
+    aov_test <- aov(metabolite ~ treatment_final_tg_6mo_22mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_tg_6mo_22mo_after_anova[[length(aov_pval_list_tg_6mo_22mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_tg_6mo_22mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg), unlist(final_statistics_anova_tg_6mo_22mo_after_anova))
+
+significant_aov_dataframe_anova_tg_6mo_22mo_after_anova <- final_aov_dataframe_anova_tg_6mo_22mo_after_anova[final_aov_dataframe_anova_tg_6mo_22mo_after_anova$unlist.final_statistics_anova_tg_6mo_22mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova <- final_aov_dataframe_anova_tg_6mo_22mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_tg_6mo_22mo_after_anova$unlist.final_statistics_anova_tg_6mo_22mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_tg_6mo_22mo_after_anova <- final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova[final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 6mo and 22mo tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_tg_6mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/6mo_vs_22mo_tg_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg[, ion] ~ factor(treatment_final_tg_6mo_22mo, levels = c('6mo', '22mo')), main="Ion distribution tg 6mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_tg_6mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/6mo_vs_22mo_tg_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg[, ion] ~ factor(treatment_final_tg_6mo_22mo, levels = c('6mo', '22mo')), main="Ion distribution tg 6mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we statistically test the 12mo and 22mo tg.
+
+```{r}
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite[rownames(processed_metabolite_values_combat_final_sample_by_metabolite) %like% "270_5_Tg_s5|271_a3_Tg_s3|210_a1tg|249_4_Tg_s3|256_a3_Tg_s3|268_3_Tg_s5",]
+treatment_final_tg_12mo_22mo <- c("12mo", "22mo", "22mo", "22mo", "12mo", "12mo")
+processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg <- processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg[,
+significant_aov_dataframe_anova_all$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_anova_all.]
+
+# Make list for pvalues to be added to
+aov_pval_list_tg_12mo_22mo_after_anova <- list()
+
+final_statistics_anova_tg_12mo_22mo_after_anova <- lapply(1:ncol(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg), function(i){
+    anova_df <- data.frame(metabolite=processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg[,i], treatment_final_tg_12mo_22mo)
+    aov_test <- aov(metabolite ~ treatment_final_tg_12mo_22mo, data=anova_df)
+    aov_pval <- summary(aov_test)[[1]][["Pr(>F)"]][1]
+    aov_pval_list_tg_12mo_22mo_after_anova[[length(aov_pval_list_tg_12mo_22mo_after_anova) + 1]] <- aov_pval
+}) 
+  
+final_aov_dataframe_anova_tg_12mo_22mo_after_anova <- data.frame(colnames(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg), unlist(final_statistics_anova_tg_12mo_22mo_after_anova))
+
+significant_aov_dataframe_anova_tg_12mo_22mo_after_anova <- final_aov_dataframe_anova_tg_12mo_22mo_after_anova[final_aov_dataframe_anova_tg_12mo_22mo_after_anova$unlist.final_statistics_anova_tg_12mo_22mo_after_anova. < 0.05, ]
+
+# Turn all pvalues into adjusted pvalues by applying FDR correction which multiples all values by the number of metabolites
+final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova <- final_aov_dataframe_anova_tg_12mo_22mo_after_anova %>% dplyr::mutate(group_padj = p.adjust(final_aov_dataframe_anova_tg_12mo_22mo_after_anova$unlist.final_statistics_anova_tg_12mo_22mo_after_anova., method = 'fdr'))
+
+significant_aov_dataframe_with_correction_anova_tg_12mo_22mo_after_anova <- final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova[final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova$group_padj < 0.05, ]
+```
+
+Below we visualize the distribution of the metabolites for 12mo and 22mo tg for the significant ions without FDR correction.
+
+```{r}
+for (ion in significant_aov_dataframe_anova_tg_12mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/12mo_vs_22mo_tg_only_significant_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg[, ion] ~ factor(treatment_final_tg_12mo_22mo, levels = c('12mo', '22mo')), main="Ion distribution tg 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+
+for (ion in significant_aov_dataframe_with_correction_anova_tg_12mo_22mo_after_anova$colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg.){
+png(filename=paste("D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Boxplots Within Phenotype Testing/12mo_vs_22mo_tg_only_significant_with_correction_ttest_ion_",ion,".png"))
+  boxplot(processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg[, ion] ~ factor(treatment_final_tg_12mo_22mo, levels = c('12mo', '22mo')), main="Ion distribution tg 12mo vs 22mo",
+   xlab=paste("Ion m/z value", ion), ylab="Z-scored Percentage")
+#  get(i) ## may have to print, too:. print(get(I))
+  dev.off()
+}
+```
+
+Below we save the statistical results.
+
+```{r}
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_wt."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova) == "unlist.final_statistics_anova_wt_6mo_12mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_6mo_12mo_wt_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Within Phenotype Testing/AGE_positive_hypothalamus_6mo_vs_12mo_wt_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_wt."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova) == "unlist.final_statistics_anova_wt_6mo_22mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_6mo_22mo_wt_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Within Phenotype Testing/AGE_positive_hypothalamus_6mo_vs_22mo_wt_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_wt."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova) == "unlist.final_statistics_anova_wt_12mo_22mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_12mo_22mo_wt_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Within Phenotype Testing/AGE_positive_hypothalamus_12mo_vs_22mo_wt_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_12mo_tg."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova) == "unlist.final_statistics_anova_tg_6mo_12mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_6mo_12mo_tg_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Within Phenotype Testing/AGE_positive_hypothalamus_6mo_vs_12mo_tg_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_6mo_22mo_tg."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova) == "unlist.final_statistics_anova_tg_6mo_22mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_6mo_22mo_tg_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Within Phenotype Testing/AGE_positive_hypothalamus_6mo_vs_22mo_tg_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova) == "colnames.processed_metabolite_values_combat_final_sample_by_metabolite_12mo_22mo_tg."] = "ion"
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova) == "unlist.final_statistics_anova_tg_12mo_22mo_after_anova."] = "pval"
+colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova)[colnames(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova) == "group_padj"] = "fdr_adjusted_pval"
+write.csv(final_aov_dataframe_with_correction_anova_12mo_22mo_tg_after_anova, 'D:/All AGE Positive masks and roi sums/Average Hypothalamus/Whole Brain Ions/Average Hypothalamus Statistical Testing Results Within Phenotype Testing/AGE_positive_hypothalamus_12mo_vs_22mo_tg_only_ttest_filtered_ions_statistical_results.csv', row.names=FALSE)
+```
