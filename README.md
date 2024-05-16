@@ -2,6 +2,8 @@
 
 This github repository contains all the code used for the McIntire lab's paper titled "Spatial lipidomics reveals accretion of docosahexaenoic and eicosapentaenoic acids in globus pallidus of Alzheimer’s disease mouse model".
 
+Please contact Dr. Laura Beth McIntire at lbm7002@med.cornell.edu for further information about this research.
+
 ## Folders
 
 1. Averaging and Filtering Ion Scripts - Contains the python notebooks used to average the left and right regions of interest and shows the filtering process for each region of interest (*Note that we used the filtered ions from the whole brain for our analyses instead of filtering ions from each region). Results from these files are used for downstream analyses in the SLAT pipeline.
