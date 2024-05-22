@@ -19,3 +19,29 @@ Please contact Dr. Laura Beth McIntire at lbm7002@med.cornell.edu for further in
 6. Pie Charts - Contains the python notebook used for creation of the pie charts showing the distribution of significant ions within each group subjected to statistical testing using the SLAT pipeline. Results from these files are found in in Figure 1.
 
 7. Segmentation Scripts - Contains the python notebooks used for the manual segmentation of positive and negative mode brain regions of interest. Results from these files are used for downstream analyses in the SLAT pipeline.
+
+
+## System Requirements
+This code has been tested on Windows 11 OS.
+
+## Code Dependencies
+The SLAT pipeline requires the following:
+* python (> = 3.10.9)
+* seaborn (> = 0.12.2)
+* scipy (> = 1.10.0)
+* ipympl (> = 0.9.3)
+* ipywidgets (> = 0.8.6)
+* mpl-interactions (> = 0.23.0)
+* pillow (> = 9.4.0)
+* R (> = 4.3.1)
+* maplet (> = 1.1.2)
+* magrittr (> = 2.0.3)
+* dply (> = 1.1.2)
+* tidyverse (> = 2.0.0)
+* car (> = 3.1.2)
+* data.table (> = 1.14.8)
+* plyr (> = 1.8.9)
+* ggpubr (> = 0.6.0)
+
+## Installation
+There are no special requirements for installation. All files can be inspected on github. 
