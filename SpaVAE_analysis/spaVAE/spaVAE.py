@@ -70,27 +70,22 @@ class SPAVAE(nn.Module):
                 fixed_gp_params=fixed_gp_params, kernel_scale=kernel_scale, jitter=1e-8, N_train=N_train, dtype=dtype, device=device)
         self.input_dim = input_dim
         self.PID = PIDControl(Kp=50, Ki=-0.005, init_beta=init_beta, min_beta=min_beta, max_beta=max_beta)
-        self.KL_loss = KL_loss          # expected KL loss value
+        self.KL_loss = KL_loss          
         self.dynamicVAE = dynamicVAE
-        self.beta = init_beta           # beta controls the weight of reconstruction loss
+        self.beta = init_beta           
         self.dtype = dtype
-        self.GP_dim = GP_dim            # dimension of latent Gaussian process embedding
-        self.Normal_dim = Normal_dim    # dimension of latent standard Gaussian embedding
-        self.noise = noise              # intensity of random noise
+        self.GP_dim = GP_dim            
+        self.Normal_dim = Normal_dim    
+        self.noise = noise              
         self.device = device
         self.encoder = DenseEncoder(input_dim=input_dim, hidden_dims=encoder_layers, output_dim=GP_dim+Normal_dim, activation="elu", dropout=encoder_dropout)
         self.decoder = buildNetwork([GP_dim+Normal_dim]+decoder_layers, activation="elu", dropout=decoder_dropout)
         if len(decoder_layers) > 0:
-            # self.dec_mean = nn.Sequential(nn.Linear(decoder_layers[-1], input_dim), MeanAct())
             self.dec_mean = nn.Sequential(nn.Linear(decoder_layers[-1], input_dim))
         else:
-            # self.dec_mean = nn.Sequential(nn.Linear(GP_dim+Normal_dim, input_dim), MeanAct())
             self.dec_mean = nn.Sequential(nn.Linear(GP_dim+Normal_dim, input_dim))
 
-        self.MSE_loss = lambda x,y: torch.sum(((x - y)) ** 2)
-        # self.dec_disp = nn.Parameter(torch.randn(self.input_dim), requires_grad=True)       # trainable dispersion parameter for NB loss
-
-        # self.NB_loss = lambda x, y: NBLoss().to(self.device)(y, x, self.dec_disp)
+        self.MSE_loss = lambda x,y: 100 * torch.sum(((x - y)) ** 2)
         self.to(device)
 
     def save_model(self, path):
@@ -105,7 +100,17 @@ class SPAVAE(nn.Module):
         self.load_state_dict(model_dict)
 
 
-    def forward(self, x, y, raw_y, size_factors, num_samples=1):
+    def forward(self, x, y, num_samples=1):
+        def kl_divergence_gaussian_laplace(gaussian_mu, gaussian_var, laplace_scale=1.0):
+            gaussian_sigma = torch.sqrt(gaussian_var)
+            kl_term = (
+                torch.log(torch.tensor(2.0 * laplace_scale, device=gaussian_mu.device)) + 
+                torch.abs(gaussian_mu) / laplace_scale + 
+                (gaussian_var / (2 * laplace_scale**2)) - 
+                0.5 - torch.log(gaussian_sigma)
+            )
+            return kl_term.sum()
+        
         self.train()
         b = y.shape[0]
         qnet_mu, qnet_var = self.encoder(y)
@@ -147,20 +152,8 @@ class SPAVAE(nn.Module):
         # KL term of GP prior
         gp_KL_term = gp_ce_term - inside_elbo
 
-        def kl_divergence_gaussian_laplace(gaussian_mu, gaussian_var, laplace_scale=1.0):
-            gaussian_sigma = torch.sqrt(gaussian_var)
-            kl_term = (
-                torch.log(2 * laplace_scale) + 
-                torch.abs(gaussian_mu) / laplace_scale + 
-                (gaussian_var / (2 * laplace_scale**2)) - 
-                0.5 - torch.log(gaussian_sigma)
-            )
-            return kl_term.sum()
 
-        # KL term of Gaussian prior
-        gaussian_prior_dist = Normal(torch.zeros_like(gaussian_mu), torch.ones_like(gaussian_var))
-        gaussian_post_dist = Normal(gaussian_mu, torch.sqrt(gaussian_var))
-        gaussian_KL_term = kl_divergence_gaussian_laplace(gaussian_post_dist, gaussian_prior_dist).sum()
+        gaussian_KL_term = kl_divergence_gaussian_laplace(gaussian_mu, gaussian_var).sum()
 
         # SAMPLE
         p_m = torch.cat((gp_p_m, gaussian_mu), dim=1)
@@ -278,8 +271,6 @@ class SPAVAE(nn.Module):
         kld_losses = []
         epochs = []
         self.beta = 0
-        lambda_v = 0.03
-        epsilon_v = 3
         for epoch in range(maxiter):
             elbo_val = 0
             recon_loss_val = 0
@@ -301,7 +292,7 @@ class SPAVAE(nn.Module):
                 elbo_val += elbo.item()
                 recon_loss_val += recon_loss.item()
                 gp_KL_term_val += gp_KL_term.item()
-                gaussian_KL_term_val += laplacian_KL_term.item()
+                laplacian_KL_term_val += laplacian_KL_term.item()
 
                 num += x_batch.shape[0]
 
@@ -317,41 +308,17 @@ class SPAVAE(nn.Module):
             elbo_val = elbo_val/num
             recon_loss_val = recon_loss_val/num
             gp_KL_term_val = gp_KL_term_val/num
-            gaussian_KL_term_val = gaussian_KL_term_val/num
+            laplacian_KL_term_val = laplacian_KL_term_val/num
             recon_losses.append(recon_loss_val)
-            kld_losses.append((gp_KL_term_val + gaussian_KL_term_val))
+            kld_losses.append((gp_KL_term_val + laplacian_KL_term_val))
             epochs.append(epoch)
-            # if epoch % 10 == 0:
-            #     plt.scatter(x=pos[:, 0], y=pos[:, 1], c=abundances[:, 1], s=10)
-            #     plt.colorbar()
-            #     plt.show()
-            #     plt.scatter(x=pos[:, 0], y=pos[:, 1], c=self.batching_recon_samples(self.batching_latent_samples(pos, abundances))[:, 1], s=10)
-            #     plt.colorbar()
-            #     plt.show()
-            #     # plt.scatter(x=pos[:, 0], y=pos[:, 1], c=abundances[:, 5], s=10)
-            #     # plt.colorbar()
-            #     # plt.show()
-            #     # plt.scatter(x=pos[:, 0], y=pos[:, 1], c=self.batching_recon_samples(self.batching_latent_samples(pos, abundances))[:, 5], s=10)
-            #     # plt.colorbar()
-            #     # plt.show()
-            print('Training epoch {}, ELBO:{:.8f}, MSE Recon loss:{:.8f}, Gaussian KLD loss:{:.8f}, GP KLD Loss:{:.8f}'.format(epoch+1, elbo_val, recon_loss_val, gaussian_KL_term_val, gp_KL_term_val))
+            print('Training epoch {}, ELBO:{:.8f}, MSE Recon loss:{:.8f}, Laplacian KLD loss:{:.8f}, GP KLD Loss:{:.8f}'.format(epoch+1, elbo_val, recon_loss_val, laplacian_KL_term_val, gp_KL_term_val))
             print('Current beta', self.beta)
             if print_kernel_scale:
                 print('Current kernel scale', torch.clamp(F.softplus(self.svgp.kernel.scale), min=1e-10, max=1e4).data)
 
             if save_model:
                 torch.save(self.state_dict(), model_weights)
-            # plt.plot(epochs, recon_losses, label='Reconstruction Loss', color='blue', marker='o')
-            # plt.xlabel('# of Training Iterations')
-            # plt.ylabel('Loss')
-            # plt.legend()
-            # plt.show()
-
-            # plt.plot(epochs, kld_losses, label='KL Divergence Loss', color='orange', marker='o')
-            # plt.xlabel('# of Training Iterations')
-            # plt.ylabel('Loss')
-            # plt.legend()
-            # plt.show()
 
     def train_model_multi(self, pos_datasets, abundances_datasets, lr=0.001, weight_decay=0.001, batch_size=512, num_samples=1, 
             maxiter=5000, save_model=True, model_weights="model.pt", print_kernel_scale=True):
@@ -440,7 +407,7 @@ class SPAVAE(nn.Module):
             laplacian_KL_term_val = laplacian_KL_term_val/num
             # noise_reg_val = noise_reg_val/num
 
-            print('Training epoch {}, ELBO:{:.8f}, MSE loss:{:.8f}, Laplacian KLD loss:{:.8f}, GP KLD Loss:{:.8f}'.format(epoch+1, elbo_val, recon_loss_val, gaussian_KL_term_val, gp_KL_term_val))
+            print('Training epoch {}, ELBO:{:.8f}, MSE loss:{:.8f}, Laplacian KLD loss:{:.8f}, GP KLD Loss:{:.8f}'.format(epoch+1, elbo_val, recon_loss_val, laplacian_KL_term_val, gp_KL_term_val))
             print('Current beta', self.beta)
             if print_kernel_scale:
                 print('Current kernel scale', torch.clamp(F.softplus(self.svgp.kernel.scale), min=1e-10, max=1e4).data)
