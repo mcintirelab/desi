@@ -1,0 +1,11 @@
+numpy
+pandas
+scipy
+scikit-learn
+matplotlib
+scanpy
+harmonypy
+igraph
+leidenalg
+umap-learn
+torch
